@@ -12,7 +12,7 @@ const pool = new Pool({
 //super basic test of connecting to the database, now time to learn schema and queries
 (async () => {
     try {
-      const res = await pool.query('SELECT NOW()');
+      const res = await pool.query("UPDATE cities SET price_sheet = jsonb_set(price_sheet, '{itemPriceKeyPairs,Stone}',$1) WHERE name = 'katu' RETURNING *",['15']);
       console.log('Database connected:', res.rows[0]);
     } catch (err) {
       console.error('Database connection error:', err);
