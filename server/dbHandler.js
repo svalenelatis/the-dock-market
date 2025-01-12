@@ -11,45 +11,7 @@ const pool = new Pool({
     password: process.env.PGPASSWORD,
     port: process.env.PGPORT,
 });
-//super basic test of connecting to the database, now time to learn schema and queries
-// (async () => {
-//     try {
-//       const res = await pool.query("SELECT NOW()");
-//       console.log('Database connected:', res.rows[0]);
-//     } catch (err) {
-//       console.error('Database connection error:', err);
-//     } finally {
-//       await pool.end();
-//     }
-//   })();
-
-
-//Our main function
-function nudgePriceSheets() {
-    pool.query('SELECT name,price_sheet FROM cities', (err, res) => { //get all cities and their price sheets
-        if (err) {
-            console.error('Error selecting from cities:', err); //error handling
-        } else {
-            const cities = res.rows; //get the rows from the query
-            for (const city of cities) { //iterate through the cities
-                console.log('Updating price sheet for:', city.name); //log the city name
-                const newPriceSheet = {...city.price_sheet}; //create a new price sheet object. Object parses to price_sheet, not priceSheet?
-                Object.keys(newPriceSheet).forEach(good => { //iterate through the goods in the price sheet
-                    //console.log(good, " ", newPriceSheet[good].price); 
-                    const oldPrice = newPriceSheet[good].price; //get the old price
-                    const newPrice = priceChanger(oldPrice); //calculate the new price
-                    console.log(good, " ", oldPrice, "->", newPrice); //log the good, old price, and new price
-                    newPriceSheet[good].price = newPrice; //update the price in the new price sheet
-                })
-                console.log(newPriceSheet);
-            }
-
-            //function will then have to update the price sheet in the database, using a transaction for data integrity
-        }
-        pool.end();
-});}
-
-async function updatePriceSheets() {
+async function updatePriceSheets() {  //the main, async function to run the price sheet update in a wrapped transaction
     const client = await pool.connect(); //grab a client to complete the transaction
 
     try {
@@ -62,7 +24,7 @@ async function updatePriceSheets() {
             for (const city of cities) { //iterate through the cities
                 console.log('Updating price sheet for:', city.name); //log the city name
                 const newPriceSheet = {...city.price_sheet}; //create a new price sheet object. Object parses to price_sheet, not priceSheet?
-                Object.keys(newPriceSheet).forEach(good => { //iterate through the goods in the price sheet
+                Object.keys(newPriceSheet).forEach(good => { //iterate through the goods in the price sheet. Difference between the for loops is a product of debugging, will fix
                     //console.log(good, " ", newPriceSheet[good].price); 
                     const oldPrice = newPriceSheet[good].price; //get the old price
                     const newPrice = priceChanger(oldPrice); //calculate the new price
@@ -89,6 +51,21 @@ async function updatePriceSheets() {
     }
 }
 
+// async function addItems() {}   this function will loop through the goods in the dataObjects.json file and add them to the database
+
+// async function addCities() {}   this function will loop through the cities in the dataObjects.json file and add them to the database. Will use addItems to populate price sheets
+
+// async function addCityTags() {}    this function will loop through the tags in the dataObjects.json file and add them to the database
+
+// async function tagCity(operation, tagName, city) {}   this function will add/remove tags from the cities, and adjust the price sheets accordingly
+
+// async function populateDatabase() {}   this function should be run on first time setup to populate the database with the dataObjects.json file
+
+// async function adjustPriceSheet(name, goodAdjustments) {}   function will adjust the price sheet for a specific city based on a created goodsAdjustments object. Used for when a player takes an action that directly adjusts a price sheet
+
+
+
+
 function addCity(cityId) {
     const cities = JSON.parse(fs.readFileSync('./dataObjects.json')).cityList;
     const name = cities[cityId].name;
@@ -102,6 +79,41 @@ function addCity(cityId) {
         pool.end();
 });}
 
+//nudgePriceSheets();
+updatePriceSheets();
+//addCity(3);
+
+
+
+// Example functions for debugging/reference
+//
+//
+//
+//example function to get all cities
+// function nudgePriceSheets() {
+//     pool.query('SELECT name,price_sheet FROM cities', (err, res) => { //get all cities and their price sheets
+//         if (err) {
+//             console.error('Error selecting from cities:', err); //error handling
+//         } else {
+//             const cities = res.rows; //get the rows from the query
+//             for (const city of cities) { //iterate through the cities
+//                 console.log('Updating price sheet for:', city.name); //log the city name
+//                 const newPriceSheet = {...city.price_sheet}; //create a new price sheet object. Object parses to price_sheet, not priceSheet?
+//                 Object.keys(newPriceSheet).forEach(good => { //iterate through the goods in the price sheet
+//                     //console.log(good, " ", newPriceSheet[good].price); 
+//                     const oldPrice = newPriceSheet[good].price; //get the old price
+//                     const newPrice = priceChanger(oldPrice); //calculate the new price
+//                     console.log(good, " ", oldPrice, "->", newPrice); //log the good, old price, and new price
+//                     newPriceSheet[good].price = newPrice; //update the price in the new price sheet
+//                 })
+//                 console.log(newPriceSheet);
+//             }
+
+//             //function will then have to update the price sheet in the database, using a transaction for data integrity
+//         }
+//         pool.end();
+// });}
+
 // async function addCitiesFromConfig() {
 //     //just using this for now, will write a better function later
 //     const data = JSON.parse(fs.readFileSync('./dataObjects.json'));
@@ -110,11 +122,14 @@ function addCity(cityId) {
 //     addCities(cities[0].name, cities[0].priceSheet);
 // }
 
-
-
-//nudgePriceSheets();
-updatePriceSheets();
-//addCity(3);
-
-
-
+//super basic test of connecting to the database, now time to learn schema and queries
+// (async () => {
+//     try {
+//       const res = await pool.query("SELECT NOW()");
+//       console.log('Database connected:', res.rows[0]);
+//     } catch (err) {
+//       console.error('Database connection error:', err);
+//     } finally {
+//       await pool.end();
+//     }
+//   })();

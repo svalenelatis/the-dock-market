@@ -1,44 +1,89 @@
-{"templatePriceSheet": {
-    "name": "City Name",
+{"templates": [
+    {"City": {
+        "name": "string",
         "priceSheet": {
-            "GoodName": {
-                "price" : 10,
-                "demand" : 5,
-                "demandSetPoint" : 4,
-                "integral" : 0
-            }}
-},"cityList": [
+            "Grain": {
+                "price" : "number",
+                "demand" : "number",
+                "demandSetPoint" : "number",
+                "integral" : "number"
+            },
+            "Metal": {
+                "price" : "number",
+                "demand" : "number",
+                "demandSetPoint" : "number",
+                "integral" : "number"
+            },
+            "Stone": {
+                "price" : "number",
+                "demand" : "number",
+                "demandSetPoint" : "number",
+                "integral" : "number"
+            },
+            "Wood": {
+                "price" : "number",
+                "demand" : "number",
+                "demandSetPoint" : "number",
+                "integral" : "number"
+            }, 
+            "Gold": {
+                "price" : "number",
+                "demand" : "number",
+                "demandSetPoint" : "number",
+                "integral" : "number"
+            },
+            "Silver": {
+                "price" : "number",
+                "demand" : "number",
+                "demandSetPoint" : "number",
+                "integral" : "number"
+            }
+        }
+    }},
+    {"Item": {
+        "name" : "string",
+        "basePrice" : "number",
+        "tags" : ["string","string","string..."]
+    }}
+],"items": [
+    {"name": "Grain", "basePrice": 10, "tags": ["food"]},
+    {"name": "Metal", "basePrice": 20, "tags": ["building"]},
+    {"name": "Stone", "basePrice": 30, "tags": ["building"]},
+    {"name": "Wood", "basePrice": 40, "tags": ["building"]},
+    {"name": "Gold", "basePrice": 50, "tags": ["luxury"]},
+    {"name": "Silver", "basePrice": 60, "tags": ["luxury"]}
+],"cityList": [
     {
         "name": "Katu",
         "priceSheet": {
             "Grain": {
                 "price" : 10,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             },
             "Metal": {
                 "price" : 20,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             },
             "Stone": {
                 "price" : 30,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             },
             "Wood": {
                 "price" : 40,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             }, 
             "Gold": {
                 "price" : 50,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             } 
         }
@@ -48,32 +93,32 @@
         "priceSheet": {
             "Grain": {
                 "price" : 10,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             },
             "Metal": {
                 "price" : 20,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             },
             "Stone": {
                 "price" : 30,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             },
             "Wood": {
                 "price" : 40,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             }, 
             "Gold": {
                 "price" : 50,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             }   
         }
@@ -83,32 +128,32 @@
         "priceSheet": {
             "Grain": {
                 "price" : 10,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             },
             "Metal": {
                 "price" : 20,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             },
             "Stone": {
                 "price" : 30,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             },
             "Wood": {
                 "price" : 40,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             }, 
             "Gold": {
                 "price" : 50,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             }   
         }
@@ -118,38 +163,38 @@
         "priceSheet": {
             "Grain": {
                 "price" : 10,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             },
             "Metal": {
                 "price" : 20,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             },
             "Stone": {
                 "price" : 30,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             },
             "Wood": {
                 "price" : 40,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             }, 
             "Gold": {
                 "price" : 50,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             },
             "Silver": {
                 "price" : 60,
-                "demand" : 5,
-                "demandSetPoint" : 4,
+                "demand" : 1,
+                "demandSetPoint" : 1,
                 "integral" : 0
             }
         }
