@@ -40,7 +40,7 @@
                 "demand" : 5,
                 "demandSetPoint" : 4,
                 "integral" : 0
-            }   
+            } 
         }
     },
     {
@@ -111,6 +111,47 @@
                 "demandSetPoint" : 4,
                 "integral" : 0
             }   
+        }
+    },
+    {
+        "name": "Capricorn",
+        "priceSheet": {
+            "Grain": {
+                "price" : 10,
+                "demand" : 5,
+                "demandSetPoint" : 4,
+                "integral" : 0
+            },
+            "Metal": {
+                "price" : 20,
+                "demand" : 5,
+                "demandSetPoint" : 4,
+                "integral" : 0
+            },
+            "Stone": {
+                "price" : 30,
+                "demand" : 5,
+                "demandSetPoint" : 4,
+                "integral" : 0
+            },
+            "Wood": {
+                "price" : 40,
+                "demand" : 5,
+                "demandSetPoint" : 4,
+                "integral" : 0
+            }, 
+            "Gold": {
+                "price" : 50,
+                "demand" : 5,
+                "demandSetPoint" : 4,
+                "integral" : 0
+            },
+            "Silver": {
+                "price" : 60,
+                "demand" : 5,
+                "demandSetPoint" : 4,
+                "integral" : 0
+            }
         }
     }
 ]
