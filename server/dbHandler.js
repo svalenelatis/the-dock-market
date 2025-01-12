@@ -23,12 +23,22 @@ const pool = new Pool({
 //     }
 //   })();
 
+
+//Our main function
 function updatePriceSheets() {
-    pool.query('SELECT name,price_sheet FROM cities', (err, res) => {
+    pool.query('SELECT name,price_sheet FROM cities', (err, res) => { //get all cities and their price sheets
         if (err) {
-            console.error('Error selecting from cities:', err);
+            console.error('Error selecting from cities:', err); //error handling
         } else {
-            console.log('Cities:', res.rows);
+            const cities = res.rows; //get the rows from the query
+            for (const city of cities) { //iterate through the cities
+                console.log('Updating price sheet for:', city.name); //log the city name
+                Object.keys(city.price_sheet).forEach(good => { //iterate through the goods in the price sheet
+                    console.log(good, " ", city.price_sheet[good].price); //add price change function here
+                })
+            }
+
+            //function will then have to update the price sheet in the database, using a transaction for data integrity
         }
         pool.end();
 });}
@@ -44,16 +54,14 @@ function addCities(cityName, priceSheet) {
 });}
 
 async function addCitiesFromConfig() {
-    //does some stuff, I'm taking a break
+    //just using this for now, will write a better function later
+    const data = JSON.parse(fs.readFileSync('./dataObjects.json'));
+    const cities = data.cityList;
+    console.log(cities[0].name);
+    addCities(cities[0].name, cities[0].priceSheet);
 }
 
-function removeCity(cityName) {
-    pool.query('DELETE FROM cities WHERE name = $1', [cityName], (err, res) => {
-        if (err) {
-            console.error('Error deleting from cities:', err);
-        } else {
-            console.log('City removed:', res.rows);
-        }
-        pool.end();
-});}
+updatePriceSheets();
+
+
 
