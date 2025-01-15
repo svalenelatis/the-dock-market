@@ -51,7 +51,11 @@ async function updatePriceSheets() {  //the main, async function to run the pric
     }
 }
 
-// async function addItems() {}   this function will loop through the goods in the dataObjects.json file and add them to the database
+async function addItems() { //need to rework item and city tag schemas before continuing, must kitbash out how to make a relational database to connect everything
+    const items = JSON.parse(fs.readFileSync('./dataObjects.json')).items;
+    console.log(items);
+    
+}   //this function will loop through the goods in the dataObjects.json file and add them to the database. Also adds Item Tags, for grouping Items
 
 // async function addCities() {}   this function will loop through the cities in the dataObjects.json file and add them to the database. Will use addItems to populate price sheets
 
@@ -80,8 +84,9 @@ function addCity(cityId) {
 });}
 
 //nudgePriceSheets();
-updatePriceSheets();
+//updatePriceSheets();
 //addCity(3);
+addItems();
 
 
 
