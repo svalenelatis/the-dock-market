@@ -59,7 +59,24 @@ async function addItems() { //need to rework item and city tag schemas before co
 
 // async function addCities() {}   this function will loop through the cities in the dataObjects.json file and add them to the database. Will use addItems to populate price sheets
 
-// async function addCityTags() {}    this function will loop through the tags in the dataObjects.json file and add them to the database
+async function addCityTags() {
+    const cityTags = JSON.parse(fs.readFileSync('./dataObjects.json')).cityTags;
+     
+
+    try{
+        await pool.query('BEGIN');
+        for (const tag of cityTags) {
+            await pool.query('INSERT INTO city_tags (name, description,effects) VALUES ($1, $2,$3)', [tag.name, tag.description,tag.effects]);
+            console.log('Tag added:', tag.name);
+        }
+        await pool.query('COMMIT');
+    } catch (e) {
+        await pool.query('ROLLBACK');
+        console.error('Error adding city tags, transaction rolled back:',e);
+    } finally {
+        pool.end();
+    }
+}    //this function will loop through the tags in the dataObjects.json file and add them to the database
 
 // async function tagCity(operation, tagName, city) {}   this function will add/remove tags from the cities, and adjust the price sheets accordingly
 
@@ -86,7 +103,8 @@ function addCity(cityId) {
 //nudgePriceSheets();
 //updatePriceSheets();
 //addCity(3);
-addItems();
+//addItems();
+addCityTags();
 
 
 

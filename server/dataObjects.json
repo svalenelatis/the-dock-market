@@ -43,15 +43,49 @@
     {"Item": {
         "name" : "string",
         "basePrice" : "number",
-        "tags" : ["string","string","string..."]
+        "components" : ["optionalString"]
+    }},
+    {"cityTag": {
+        "name" : "string",
+        "description" : "string",
+        "effects" : {
+            "goods" : {
+                "Grain" : 0.0,
+                "Livestock" : 0.0,
+                "Water" : 0.0,
+                "Textiles" : 0.0,
+                "Metal" : 0.0,
+                "Stone" : 0.0,
+                "Wood" : 0.0,
+                "Gold" : 0.0,
+                "Silver" : 0.0,
+                "Gemstones" : 0.0,
+                "Zerikanium" : 0.0,
+                "Weapons" : 0.0,
+                "Tools" : 0.0,
+                "Clothing" : 0.0,
+                "Rations" : 0.0,
+                "Building Materials" : 0.0
+            
+            }}
     }}
 ],"items": [
-    {"name": "Grain", "basePrice": 10, "tags": ["food"]},
-    {"name": "Metal", "basePrice": 20, "tags": ["building"]},
-    {"name": "Stone", "basePrice": 30, "tags": ["building"]},
-    {"name": "Wood", "basePrice": 40, "tags": ["building"]},
-    {"name": "Gold", "basePrice": 50, "tags": ["luxury"]},
-    {"name": "Silver", "basePrice": 60, "tags": ["luxury"]}
+    {"name": "Grain", "basePrice": 10},
+    {"name" : "Livestock", "basePrice": 20},
+    {"name" : "Water", "basePrice": 20},
+    {"name" : "Textiles", "basePrice": 30},
+    {"name": "Metal", "basePrice": 20},
+    {"name": "Stone", "basePrice": 30},
+    {"name": "Wood", "basePrice": 40},
+    {"name": "Gold", "basePrice": 60},
+    {"name": "Silver", "basePrice": 50},
+    {"name": "Gemstones", "basePrice": 60},
+    {"name": "Zerikanium", "basePrice": 200, "components": ["Gemstones","Silver"]},
+    {"name": "Weapons", "basePrice": 100, "components": ["Metal","Wood"]},
+    {"name": "Tools", "basePrice": 50, "components": ["Metal","Wood"]},
+    {"name": "Clothing", "basePrice": 50, "components": ["Textiles","Livestock"]},
+    {"name": "Rations", "basePrice": 20, "components": ["Grain","Livestock","Water"]},
+    {"name": "Building Materials", "basePrice": 50, "components": ["Stone","Wood"]}
 ],"cityList": [
     {
         "name": "Katu",
@@ -198,6 +232,229 @@
                 "integral" : 0
             }
         }
+    }
+],"cityTags": [
+    {
+    "name" : "Agricultural",
+    "description" : "This island grows a lot of food.",
+    "effects" : {
+        "goods" : {
+            "Grain" : -0.1,
+            "Livestock" : -0.1,
+            "Wood" : -0.1,
+            "Water" : 0.1,
+            "Tools" : 0.1
+        }
+    }},
+    {
+    "name" : "Industrial",
+    "description" : "This island produces a lot of goods.",
+    "effects" : {
+        "goods" : {
+            "Textiles" : 0.1,
+            "Metal" : 0.1,
+            "Stone" : 0.1,
+            "Wood" : 0.1,
+            "Gold" : 0.0,
+            "Silver" : 0.1,
+            "Gemstones" : 0.1,
+            "Weapons" : -0.1,
+            "Tools" : -0.1,
+            "Clothing" : -0.1,
+            "Rations" : -0.1,
+            "Building Materials" : -0.1
+        }
+    }},
+    {
+    "name" : "Mining",
+    "description" : "This island has a lot of mines.",
+    "effects" : {
+        "goods" : {
+            "Metal" : -0.1,
+            "Stone" : -0.1,
+            "Gold" : -0.1,
+            "Silver" : -0.1,
+            "Tools" : 0.1
+        }
+    }},
+    {
+    "name" : "Mercantile",
+    "description" : "This island is a hub of trade.",
+    "effects" : {
+        "goods" : {
+            "Grain" : -0.1,
+            "Livestock" : -0.1,
+            "Water" : -0.1,
+            "Textiles" : -0.1,
+            "Metal" : -0.1,
+            "Stone" : -0.1,
+            "Wood" : -0.1,
+            "Gold" : 0.2,
+            "Silver" : 0.2,
+            "Gemstones" : 0.2,
+            "Zerikanium" : 0.2,
+            "Weapons" : 0.1,
+            "Tools" : 0.1,
+            "Clothing" : 0.1,
+            "Rations" : 0.1,
+            "Building Materials" : 0.1
+        }
+    }},
+    {
+    "name" : "Military",
+    "description" : "This island has a strong military presence.",
+    "effects" : {
+        "goods" : {
+            "Weapons" : 0.1,
+            "Rations" : 0.1,
+            "Building Materials" : 0.1
+        }
+    }},
+    {
+    "name" : "Isolated",
+    "description" : "This island is far from other islands.",
+    "effects" : {
+        "goods" : {
+            "Grain" : 0.1,
+            "Livestock" : 0.1,
+            "Water" : 0.1,
+            "Textiles" : 0.1,
+            "Metal" : 0.1,
+            "Stone" : 0.1,
+            "Wood" : 0.1,
+            "Gold" : 0.1,
+            "Silver" : 0.1,
+            "Gemstones" : 0.1,
+            "Zerikanium" : 0.1,
+            "Weapons" : 0.1,
+            "Tools" : 0.1,
+            "Clothing" : 0.1,
+            "Rations" : 0.1,
+            "Building Materials" : 0.1
+        }
+    }},
+    {
+    "name" : "Cultural",
+    "description" : "This island has a rich cultural history.",
+    "effects" : {
+        "goods" : {
+            "Textiles" : 0.1,
+            "Gold" : 0.1,
+            "Silver" : 0.1,
+            "Gemstones" : 0.1,
+            "Clothing" : 0.1,
+            "Building Materials" : 0.1
+        }
+    }},
+    {
+    "name" : "Xenophobic",
+    "description" : "This island dislikes other islands.",
+    "effects" : {
+        "goods" : {
+            "Grain" : -0.1,
+            "Livestock" : -0.1,
+            "Water" : -0.1,
+            "Textiles" : -0.1,
+            "Metal" : -0.1,
+            "Stone" : -0.1,
+            "Wood" : -0.1,
+            "Zerikanium" : 0.1,
+            "Weapons" : 0.1,
+            "Tools" : -0.1,
+            "Clothing" : -0.1,
+            "Rations" : -0.1,
+            "Building Materials" : -0.1
+        }
+    }},
+    {
+    "name" : "Wealthy",
+    "description" : "This island is very wealthy.",
+    "effects" : {
+        "goods" : {
+            "Gold" : 0.2,
+            "Silver" : 0.2,
+            "Gemstones" : 0.2,
+            "Zerikanium" : 0.2,
+            "Weapons" : 0.1,
+            "Building Materials" : 0.1
+        }
+    }},
+    {
+    "name" : "Poor",
+    "description" : "This island is very poor.",
+    "effects" : {
+        "goods" : {
+            "Grain" : 0.1,
+            "Livestock" : 0.1,
+            "Water" : 0.1,
+            "Textiles" : 0.1,
+            "Metal" : 0.1,
+            "Stone" : 0.1,
+            "Wood" : 0.1,
+            "Weapons" : -0.1,
+            "Tools" : -0.1,
+            "Clothing" : -0.1,
+            "Rations" : -0.1,
+            "Building Materials" : -0.1
+        }
+    }},
+    {
+    "name" : "Artisinal",
+    "description" : "This island produces high quality goods.",
+    "effects" : {
+        "goods" : {
+            "Textiles" : 0.1,
+            "Metal" : 0.1,
+            "Gold" : 0.1,
+            "Silver" : 0.1,
+            "Gemstones" : 0.1,
+            "Weapons" : 0.1,
+            "Tools" : 0.1,
+            "Clothing" : 0.1
+        }
+    }},
+    {
+    "name" : "Lawless",
+    "description" : "This island is full of pirates and outlaws.",
+    "effects" : {
+        "goods" : {
+            "Water" : 0.1,
+            "Weapons" : 0.1,
+            "Rations" : 0.1,
+            "Zerikanium" : 0.1,
+            "Gold" : 0.1,
+            "Silver" : 0.1,
+            "Building Materials" : 0.1
+        }
+    }},
+    {
+    "name" : "Storm-Wrecked",
+    "description" : "This island was recently hit by a storm, and is rebuilding.",
+    "effects" : {
+        "goods" : {
+            "Grain" : 0.3,
+            "Livestock" : 0.3,
+            "Water" : 0.3,
+            "Stone" : 0.3,
+            "Wood" : 0.3,
+            "Tools" : 0.3,
+            "Clothing" : 0.3,
+            "Rations" : 0.3,
+            "Building Materials" : 0.3
+        }
+    }},
+    {
+    "name" : "Blighted",
+    "description" : "This island's crops are suffering from a blight.",
+    "effects" : {
+        "goods" : {
+            "Grain" : 0.3,
+            "Livestock" : 0.3,
+            "Water" : 0.3,
+            "Rations" : 0.3
+        }
+    }},
+    {
     }
 ]
 }
