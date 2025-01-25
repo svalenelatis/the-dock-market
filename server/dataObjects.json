@@ -69,6 +69,11 @@
             
             }}
     }}
+],"itemTags": [
+    {"name" : "Food","goods" : ["Grain","Livestock","Water","Rations"],"description" : "These goods are used for food."},
+    {"name" : "Raw Materials","goods" : ["Metal","Stone","Wood"],"description" : "These goods are used to make other goods."},
+    {"name" : "Luxury Goods","goods" : ["Gold","Silver","Gemstones","Zerikanium"],"description" : "These goods are expensive and rare."},
+    {"name" : "Manufactured Goods","goods" : ["Weapons","Tools","Clothing","Building Materials"],"description" : "These goods are manufactured from raw materials."}
 ],"items": [
     {"name": "Grain", "basePrice": 10},
     {"name" : "Livestock", "basePrice": 20},
@@ -244,6 +249,9 @@
             "Wood" : -0.1,
             "Water" : 0.1,
             "Tools" : 0.1
+        },
+        "tags" : {
+            "Food" : 0.1
         }
     }},
     {

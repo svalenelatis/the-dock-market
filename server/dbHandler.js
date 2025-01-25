@@ -2,6 +2,7 @@ require('dotenv').config({path: '../.env'});
 const { Pool } = require('pg');
 const priceChanger = require('./priceChanger');
 const fs = require('fs');
+const { populate } = require('dotenv');
 
 
 const pool = new Pool({
@@ -51,7 +52,7 @@ async function updatePriceSheets() {  //the main, async function to run the pric
     }
 }
 
-async function addItems() { //takes all items, and adds them to the database. 
+async function addItems() { //adds all items from config. 
     const items = JSON.parse(fs.readFileSync('./dataObjects.json')).items;
     //console.log(items);
 
@@ -72,14 +73,12 @@ async function addItems() { //takes all items, and adds them to the database.
         await pool.query('ROLLBACK');
         console.error('Error adding items, transaction rolled back:',e);
     } finally {
-        pool.end();
+        console.log('Items done');
     }
     
-}   //this function will loop through the goods in the dataObjects.json file and add them to the database. Also adds Item Tags, for grouping Items
+}   
 
-// async function addCities() {}   this function will loop through the cities in the dataObjects.json file and add them to the database. Will use addItems to populate price sheets
-
-async function addCityTags() {
+async function addCityTags() { //adds City Tags from config
     const cityTags = JSON.parse(fs.readFileSync('./dataObjects.json')).cityTags;
      
 
@@ -94,11 +93,11 @@ async function addCityTags() {
         await pool.query('ROLLBACK');
         console.error('Error adding city tags, transaction rolled back:',e);
     } finally {
-        pool.end();
+        console.log('City Tags done');
     }
-}    //this function will loop through the tags in the dataObjects.json file and add them to the database
+}    
 
-async function tagCity(operation, tagName, city) {
+async function tagCity(operation, tagName, city) { // this function will add/remove tags from the cities, and adjust the price sheets accordingly
     const client = await pool.connect();
     try{
         await client.query('BEGIN'); //transaction time
@@ -154,14 +153,9 @@ async function tagCity(operation, tagName, city) {
         client.release();
 }
 pool.end();
-} // this function will add/remove tags from the cities, and adjust the price sheets accordingly
+} 
 
-// async function populateDatabase() {}   this function should be run on first time setup to populate the database with the dataObjects.json file
-
-// async function adjustPriceSheet(name, goodAdjustments) {}   function will adjust the price sheet for a specific city based on a created goodsAdjustments object. Used for when a player takes an action that directly adjusts a price sheet
-
-
-async function resetDatabase() {
+async function resetDatabase(poolCheck) {
     try {
         const schema = fs.readFileSync('./schema.sql', 'utf8');
         console.log('Schema read:', schema);
@@ -172,7 +166,13 @@ async function resetDatabase() {
         console.error('Error loading schema:', e);
     }
     finally {
-        pool.end();
+        if(check){
+            console.log('Pool stays open.');
+        }
+        else{
+            console.log('Pool closing.');
+            pool.end();
+        }
     }
 }
 
@@ -189,6 +189,72 @@ function addCity(cityId) {
         pool.end();
 });}
 
+async function addCities() { //this function will loop through the cities in the dataObjects.json file and add them to the database. Will use addItems to populate price sheets
+    const cities = JSON.parse(fs.readFileSync('./dataObjects.json')).cityList;
+    try {
+        await pool.query('BEGIN');
+        const priceSheet = generatePriceSheet();
+        for (const city of cities) {
+            await pool.query('INSERT INTO cities (name, price_sheet) VALUES ($1, $2)', [city.name, priceSheet]);
+            console.log('City added:', city.name);
+        }
+        await pool.query('COMMIT');
+    } catch (e) {
+        await pool.query('ROLLBACK');
+        console.error('Error adding cities, transaction rolled back:', e);
+    } finally {
+        console.log('Cities done');
+    }
+}
+
+async function addItemTags() {
+    const itemTags = JSON.parse(fs.readFileSync('./dataObjects.json')).itemTags;
+    try {
+        await pool.query('BEGIN');
+        
+        
+        for (const tag of itemTags) {
+            const result = await pool.query('INSERT INTO item_tags (name, description) VALUES ($1, $2) RETURNING id', [tag.name, tag.description]);
+            tagId = result.rows[0].id;
+            console.log('Tag added:', tag.name);
+            if(tag.goods.length > 0) {
+                const goodsValues = tag.goods.map(good => `(${tagId}, '${good}')`).join(', ');
+                await pool.query(`INSERT INTO item_tag_goods (item_tag_id, good_name) VALUES ${goodsValues}`);
+                console.log('Goods added:', tag.goods);
+            }
+            
+        }
+        await pool.query('COMMIT');
+    } catch (e) {    
+        await pool.query('ROLLBACK');
+        console.error('Error adding item tags, transaction rolled back:', e);
+    } finally {
+        console.log('Item tags added');
+    }
+}
+
+function generatePriceSheet() {
+    const priceSheet = {};
+    const items = JSON.parse(fs.readFileSync('./dataObjects.json')).items;
+    for (const item of items) {
+        priceSheet[item.name] = {price: item.basePrice, demand: 1, demandSetpoint: 1, integral: 0};
+    }
+    console.log("New Price Sheet Generated from item config");
+    return priceSheet;
+}
+
+async function populateDatabase() {
+    await resetDatabase(true);
+    await addItems();
+    await addCityTags();
+    await addItemTags();
+    await addCities();
+    pool.end();
+}   //this function should be run on first time setup to populate the database with the dataObjects.json file
+
+// async function adjustPriceSheet(name, goodAdjustments) {}   function will adjust the price sheet for a specific city based on a created goodsAdjustments object. Used for when a player takes an action that directly adjusts a price sheet
+
+
 //nudgePriceSheets();
 //updatePriceSheets();
 //addCity(3);
@@ -196,7 +262,10 @@ function addCity(cityId) {
 //addCityTags();
 //tagCity('add','Agricultural','Blue Harbor');
 //resetDatabase();
-
+//addItemTags();
+//generatePriceSheet();
+//addCities();
+populateDatabase();
 
 
 // Example functions for debugging/reference

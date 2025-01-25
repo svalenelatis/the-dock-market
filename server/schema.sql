@@ -23,3 +23,18 @@ CREATE TABLE city_tags (
     description TEXT,
     effects JSONB NOT NULL
 );
+
+-- Item Tags Table
+CREATE TABLE item_tags (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT
+);
+
+-- Item Tag Goods Table
+CREATE TABLE item_tag_goods (
+    item_tag_id INT REFERENCES item_tags(id) ON DELETE CASCADE,
+    good_name VARCHAR(100) NOT NULL,
+    PRIMARY KEY (item_tag_id, good_name)
+);
+
