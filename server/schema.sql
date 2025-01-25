@@ -13,7 +13,8 @@ CREATE TABLE cities (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     price_sheet JSONB NOT NULL,
-    tags TEXT[] DEFAULT NULL
+    tags TEXT[] DEFAULT NULL,
+    volatility NUMERIC DEFAULT 0.02
 );
 
 -- Tags Table
@@ -21,7 +22,8 @@ CREATE TABLE city_tags (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT,
-    effects JSONB NOT NULL
+    effects JSONB NOT NULL,
+    random BOOLEAN DEFAULT FALSE
 );
 
 -- Item Tags Table

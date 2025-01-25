@@ -1,44 +1,8 @@
 {"templates": [
     {"City": {
         "name": "string",
-        "priceSheet": {
-            "Grain": {
-                "price" : "number",
-                "demand" : "number",
-                "demandSetPoint" : "number",
-                "integral" : "number"
-            },
-            "Metal": {
-                "price" : "number",
-                "demand" : "number",
-                "demandSetPoint" : "number",
-                "integral" : "number"
-            },
-            "Stone": {
-                "price" : "number",
-                "demand" : "number",
-                "demandSetPoint" : "number",
-                "integral" : "number"
-            },
-            "Wood": {
-                "price" : "number",
-                "demand" : "number",
-                "demandSetPoint" : "number",
-                "integral" : "number"
-            }, 
-            "Gold": {
-                "price" : "number",
-                "demand" : "number",
-                "demandSetPoint" : "number",
-                "integral" : "number"
-            },
-            "Silver": {
-                "price" : "number",
-                "demand" : "number",
-                "demandSetPoint" : "number",
-                "integral" : "number"
-            }
-        }
+        "tags": ["string"],
+        "volatility": "number"
     }},
     {"Item": {
         "name" : "string",
@@ -68,6 +32,11 @@
                 "Building Materials" : 0.0
             
             }}
+    }},
+    {"itemTag": {
+        "name" : "string",
+        "goods" : ["string"],
+        "description" : "string"
     }}
 ],"itemTags": [
     {"name" : "Food","goods" : ["Grain","Livestock","Water","Rations"],"description" : "These goods are used for food."},
@@ -94,149 +63,23 @@
 ],"cityList": [
     {
         "name": "Katu",
-        "priceSheet": {
-            "Grain": {
-                "price" : 10,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            },
-            "Metal": {
-                "price" : 20,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            },
-            "Stone": {
-                "price" : 30,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            },
-            "Wood": {
-                "price" : 40,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            }, 
-            "Gold": {
-                "price" : 50,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            } 
-        }
+        "tags": ["Industrial","Cultural","Mercantile"],
+        "volatility": 0.02
     },
     {
         "name": "Blue Harbor",
-        "priceSheet": {
-            "Grain": {
-                "price" : 10,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            },
-            "Metal": {
-                "price" : 20,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            },
-            "Stone": {
-                "price" : 30,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            },
-            "Wood": {
-                "price" : 40,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            }, 
-            "Gold": {
-                "price" : 50,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            }   
-        }
+        "tags": ["Mercantile","Lawless","Wealthy"],
+        "volatility": 0.02
     },
     {
         "name": "Temikor",
-        "priceSheet": {
-            "Grain": {
-                "price" : 10,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            },
-            "Metal": {
-                "price" : 20,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            },
-            "Stone": {
-                "price" : 30,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            },
-            "Wood": {
-                "price" : 40,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            }, 
-            "Gold": {
-                "price" : 50,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            }   
-        }
+        "tags": ["Mining","Isolated","Cultural"],
+        "volatility": 0.02
     },
     {
         "name": "Capricorn",
-        "priceSheet": {
-            "Grain": {
-                "price" : 10,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            },
-            "Metal": {
-                "price" : 20,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            },
-            "Stone": {
-                "price" : 30,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            },
-            "Wood": {
-                "price" : 40,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            }, 
-            "Gold": {
-                "price" : 50,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            },
-            "Silver": {
-                "price" : 60,
-                "demand" : 1,
-                "demandSetPoint" : 1,
-                "integral" : 0
-            }
-        }
+        "tags": ["Mercantile","Wealthy","Artisinal","Cultural"]
+        ,"volatility": 0.02
     }
 ],"cityTags": [
     {
@@ -462,5 +305,24 @@
             "Rations" : 0.3
         }
     }}
+],"randomEventTags": [
+    {
+        "name" : "Drought",
+        "description" : "A drought has hit the island, causing food prices to rise.",
+        "effects" : {
+            "tags" : {
+                "Food" : 0.05
+            }
+        }
+    },
+    {
+        "name" : "Bountiful Harvest",
+        "description" : "A bountiful harvest has caused food prices to drop.",
+        "effects" : {
+            "tags" : {
+                "Food" : -0.05
+            }
+        }
+    }
 ]
 }
