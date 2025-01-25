@@ -51,9 +51,29 @@ async function updatePriceSheets() {  //the main, async function to run the pric
     }
 }
 
-async function addItems() { //need to rework item and city tag schemas before continuing, must kitbash out how to make a relational database to connect everything
+async function addItems() { //takes all items, and adds them to the database. 
     const items = JSON.parse(fs.readFileSync('./dataObjects.json')).items;
-    console.log(items);
+    //console.log(items);
+
+    try {
+        await pool.query('BEGIN');
+        for (const item of items) {
+            if(item.components !== undefined){
+                await pool.query('INSERT INTO items (name, base_price, components) VALUES ($1, $2,$3)', [item.name, item.basePrice,item.components]);
+                console.log('Item with components added:', item.name,item.components);
+            }
+            else {
+                await pool.query('INSERT INTO items (name, base_price,components) VALUES ($1, $2,$3)', [item.name, item.basePrice,null]);
+                console.log('Item with no components added:', item.name);
+            }
+        await pool.query('COMMIT');
+    }
+    } catch (e) {
+        await pool.query('ROLLBACK');
+        console.error('Error adding items, transaction rolled back:',e);
+    } finally {
+        pool.end();
+    }
     
 }   //this function will loop through the goods in the dataObjects.json file and add them to the database. Also adds Item Tags, for grouping Items
 
@@ -78,14 +98,83 @@ async function addCityTags() {
     }
 }    //this function will loop through the tags in the dataObjects.json file and add them to the database
 
-// async function tagCity(operation, tagName, city) {}   this function will add/remove tags from the cities, and adjust the price sheets accordingly
+async function tagCity(operation, tagName, city) {
+    const client = await pool.connect();
+    try{
+        await client.query('BEGIN'); //transaction time
+
+        const cityResult = await client.query('SELECT tags,price_sheet FROM cities WHERE name = $1', [city]);
+        //console.log(cityResult.rows[0]);
+
+
+        if (cityResult.rows.length === 0) { //General error handlingt
+            throw new Error(`City with name ${city} not found`);
+        }
+        let { tags, price_sheet } = cityResult.rows[0];
+        tags = tags || []; 
+
+        const tagResult = await client.query('SELECT * FROM city_tags WHERE name = $1', [tagName]);
+        if (tagResult.rows.length === 0) {
+            throw new Error(`Tag with name ${tagName} not found`);
+        }
+        //console.log(tagResult.rows[0]);
+        const tagEffects = tagResult.rows[0].effects.goods;
+        console.log(tagEffects);
+
+        if(operation == 'add'){
+            if(!tags.includes(tagName)){
+                tags.push(tagName);
+            }
+        }
+        else if(operation == 'remove'){
+            if(tags.includes(tagName)){
+                tags = tags.filter(tag => tag !== tagName);
+            }
+        }
+        else {
+            throw new Error('Invalid operation');
+        }
+
+        for (const [good, effect] of Object.entries(tagEffects)) {
+            //console.log(good, effect);
+            if(price_sheet[good]){
+                console.log(good, price_sheet[good].demand);
+                price_sheet[good].demand += effect === 'add' ? effect : -effect; //fancy ternary operator to add or subtract the effect
+                console.log(good, price_sheet[good].demand);
+            }
+        }
+
+        await client.query('UPDATE cities SET tags = $1, price_sheet = $2 WHERE name = $3', [tags, price_sheet, city]);
+        console.log('Successfully ${operation}ed tag ${tagName} to city ${city}');
+    }
+    catch (e) {
+        await client.query('ROLLBACK');
+        console.error('Error tagging city, transaction rolled back:',e);
+    } finally {
+        client.release();
+}
+pool.end();
+} // this function will add/remove tags from the cities, and adjust the price sheets accordingly
 
 // async function populateDatabase() {}   this function should be run on first time setup to populate the database with the dataObjects.json file
 
 // async function adjustPriceSheet(name, goodAdjustments) {}   function will adjust the price sheet for a specific city based on a created goodsAdjustments object. Used for when a player takes an action that directly adjusts a price sheet
 
 
-
+async function resetDatabase() {
+    try {
+        const schema = fs.readFileSync('./schema.sql', 'utf8');
+        console.log('Schema read:', schema);
+        await pool.query(schema);
+        console.log('Database reset, schema successfully loaded');
+    }
+    catch (e) {
+        console.error('Error loading schema:', e);
+    }
+    finally {
+        pool.end();
+    }
+}
 
 function addCity(cityId) {
     const cities = JSON.parse(fs.readFileSync('./dataObjects.json')).cityList;
@@ -104,7 +193,9 @@ function addCity(cityId) {
 //updatePriceSheets();
 //addCity(3);
 //addItems();
-addCityTags();
+//addCityTags();
+//tagCity('add','Agricultural','Blue Harbor');
+//resetDatabase();
 
 
 
