@@ -19,18 +19,35 @@ async function updatePriceSheets() {  //the main, async function to run the pric
         await client.query('BEGIN'); //begin the transaction. Ensures atomicity and data integrity
         
 
-        const res = await client.query('SELECT id,name,price_sheet FROM cities'); //get all cities and their price sheets
-        const cities = res.rows; //get the rows from the query
+        const cityRes = await client.query('SELECT id,name,price_sheet,volatility FROM cities'); //get all cities and their price sheets
+        const cities = cityRes.rows; //get the rows from the query
+        const itemRes = await client.query('SELECT name, base_price FROM items')
+
+        const basePrices = {};
+        itemRes.rows.forEach(item => {
+            //console.log(item)
+            basePrices[item.name] = item.base_price;
+        })
+        //console.log(basePrices);
 
             for (const city of cities) { //iterate through the cities
                 console.log('Updating price sheet for:', city.name); //log the city name
                 const newPriceSheet = {...city.price_sheet}; //create a new price sheet object. Object parses to price_sheet, not priceSheet?
                 Object.keys(newPriceSheet).forEach(good => { //iterate through the goods in the price sheet. Difference between the for loops is a product of debugging, will fix
+                    let {price,demand,integral,demandSetpoint} = newPriceSheet[good];
                     //console.log(good, " ", newPriceSheet[good].price); 
-                    const oldPrice = newPriceSheet[good].price; //get the old price
-                    const newPrice = priceChanger(oldPrice); //calculate the new price
-                    console.log(good, " ", oldPrice, "->", newPrice); //log the good, old price, and new price
-                    newPriceSheet[good].price = newPrice; //update the price in the new price sheet
+                    //console.log(price,demand,integral,demandSetpoint)
+                    const oldValues = {oldPrice: price,oldDemand: demand, oldIntegral: integral}; //get the old price
+                    //console.log(basePrices[good])
+                    const newValues = priceChanger(basePrices[good],price,demandSetpoint,demand,integral,.2 ,5 ,0.1 ,2); //calculate the new price
+                    //console.log(newValues)
+                    //console.log(good, " ", oldPrice, "->", newValues.price); //log the good, old price, and new price
+                    newPriceSheet[good].price = roundToThree(jitter(newValues.price,city.volatility)); //update the price in the new price sheet
+                    newPriceSheet[good].demand = roundToThree(jitter(newValues.demand,city.volatility));
+                    newPriceSheet[good].integral = newValues.integral;
+                    console.log(oldValues)
+                    console.log("---->")
+                    console.log(newValues)
                 })
                 //console.log(newPriceSheet);
                 //console.log(city.id);
@@ -50,6 +67,11 @@ async function updatePriceSheets() {  //the main, async function to run the pric
     } finally {
         client.release(); //release the client
     }
+}
+
+function jitter(value,factor) {
+    const jit = (Math.random() * 2 - 1) * factor;
+    return value + jit;
 }
 
 async function addItems() { //adds all items from config. 
@@ -304,7 +326,6 @@ async function populateDatabase() {
 //generatePriceSheet();
 //addCities();
 //populateDatabase();
-
 
 // Example functions for debugging/reference
 //

@@ -64,22 +64,22 @@
     {
         "name": "Katu",
         "tags": ["Industrial","Cultural","Mercantile"],
-        "volatility": 0.02
+        "volatility": 0.1
     },
     {
         "name": "Blue Harbor",
         "tags": ["Mercantile","Lawless","Wealthy"],
-        "volatility": 0.02
+        "volatility": 0.1
     },
     {
         "name": "Temikor",
         "tags": ["Mining","Isolated","Cultural"],
-        "volatility": 0.02
+        "volatility": 0.1
     },
     {
         "name": "Capricorn",
         "tags": ["Mercantile","Wealthy","Artisinal","Cultural"]
-        ,"volatility": 0.02
+        ,"volatility": 0.1
     }
 ],"cityTags": [
     {
