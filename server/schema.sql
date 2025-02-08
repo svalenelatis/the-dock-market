@@ -1,4 +1,5 @@
-DROP TABLE IF EXISTS city_tags, item_tag_goods, item_tags, cities, items CASCADE;
+DROP TABLE IF EXISTS city_tags, item_tag_goods, item_tags, cities, items, players, player_inventories, transactions, ships, ship_inventories CASCADE;
+
 
 -- Items Table
 CREATE TABLE items (
@@ -40,3 +41,45 @@ CREATE TABLE item_tag_goods (
     PRIMARY KEY (item_tag_id, good_name)
 );
 
+CREATE TABLE players (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    gold NUMERIC(10,2) DEFAULT 10.00 NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE player_inventories (
+    player_id INT REFERENCES players(id) ON DELETE CASCADE,
+    item_name VARCHAR(100) REFERENCES items(name) ON DELETE CASCADE,
+    quantity INT DEFAULT 0,
+    PRIMARY KEY (player_id, item_name)
+);
+
+CREATE TABLE transactions (
+    id SERIAL PRIMARY KEY,
+    player_id INT REFERENCES players(id) ON DELETE CASCADE,
+    ship_id INT, -- Assuming you have a ships table or will add one
+    city_name VARCHAR(100),
+    scheduled_date DATE,
+    actions JSONB NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending', -- pending, completed, failed
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE ships (
+    id SERIAL PRIMARY KEY,
+    player_id INT REFERENCES players(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    speed NUMERIC(10,2) NOT NULL,
+    cargo_space INT NOT NULL,
+    attributes JSONB DEFAULT '{}', -- For storing additional attributes like unique abilities
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE ship_inventories (
+    ship_id INT REFERENCES ships(id) ON DELETE CASCADE,
+    item_name VARCHAR(100) REFERENCES items(name) ON DELETE CASCADE,
+    quantity INT DEFAULT 0,
+    PRIMARY KEY (ship_id, item_name)
+);

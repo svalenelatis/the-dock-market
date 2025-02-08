@@ -3,6 +3,7 @@ const { Pool } = require('pg');
 const priceChanger = require('./priceChanger');
 const fs = require('fs');
 const { populate } = require('dotenv');
+const bcrypt = require('bcrypt');
 
 
 const pool = new Pool({
@@ -302,6 +303,227 @@ function generatePriceSheet() { //generates a price sheet based on the items in 
     return priceSheet;
 }
 
+async function createPlayer(username, password) {
+    const saltRounds = 10;
+
+    const existingUser = await pool.query('SELECT id FROM players WHERE username = $1', [username]);
+
+    if (existingUser.rows.length > 0) {
+        throw new Error('Username already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    await pool.query('BEGIN');
+    try {
+        const result = await pool.query('INSERT INTO players (username, password_hash) VALUES ($1, $2) RETURNING id', [username, hashedPassword]);
+        const playerId = result.rows[0].id;
+        await pool.query('COMMIT');
+        console.log('Player created with ID:', playerId);
+    } catch (e) {
+        await pool.query('ROLLBACK');
+        console.error('Error creating player, transaction rolled back:', e);
+        throw e;
+    } finally {
+        //pool.end();
+        console.log("made a player")
+    }
+}
+
+async function deletePlayer(username) {
+    try {
+        const res = await pool.query(
+            'DELETE FROM players WHERE username = $1 RETURNING id',
+            [username]
+        );
+        if (res.rowCount === 0) {
+            throw new Error('User not found. No deletion occurred.');
+        }
+        return true; // Player deleted successfully
+    } catch (error) {
+        console.error(`Error deleting player: ${error.message}`);
+        return false; // Indicate failure
+    }
+}
+
+async function itemExists(itemName) {
+    try {
+        const res = await pool.query(
+            'SELECT 1 FROM items WHERE name = $1',
+            [itemName]
+        );
+        return res.rows.length > 0;
+    } catch (e) {
+        console.error('Error checking if item exists:', e);
+        throw e;
+    }
+    finally {
+        //pool.end();
+        console.log("item exists");
+    }
+}
+
+async function addItemToInventory(ownerId, itemName, quantity, isShip = false) {
+    try {
+        if (!await itemExists(itemName)) {
+            throw new Error(`Item with name ${itemName} does not exist`);
+        }
+
+        const table = isShip ? 'ship_inventories' : 'player_inventories';
+        const idColumn = isShip ? 'ship_id' : 'player_id';
+
+        await pool.query('BEGIN');
+        const res = await pool.query(
+            `INSERT INTO ${table} (${idColumn}, item_name, quantity) VALUES ($1, $2, $3) ON CONFLICT (${idColumn}, item_name) DO UPDATE SET quantity = ${table}.quantity + EXCLUDED.quantity RETURNING quantity`,
+            [ownerId, itemName, quantity]
+        );
+        await pool.query('COMMIT');
+        return res.rows[0].quantity;
+    } catch (e) {
+        await pool.query('ROLLBACK');
+        console.error('Error adding item to inventory, transaction rolled back:', e);
+        throw e;
+    }
+}
+
+async function subtractItemFromInventory(ownerId, itemName, quantity, isShip = false) {
+    try {
+        if (!await itemExists(itemName)) {
+            throw new Error(`Item with name ${itemName} does not exist`);
+        }
+
+        const table = isShip ? 'ship_inventories' : 'player_inventories';
+        const idColumn = isShip ? 'ship_id' : 'player_id';
+
+        await pool.query('BEGIN');
+        const res = await pool.query(
+            `SELECT quantity FROM ${table} WHERE ${idColumn} = $1 AND item_name = $2`,
+            [ownerId, itemName]
+        );
+        if (res.rows.length === 0 || res.rows[0].quantity < quantity) {
+            await pool.query('ROLLBACK');
+            return { success: false, deficit: quantity - (res.rows[0]?.quantity || 0) };
+        }
+        await pool.query(
+            `UPDATE ${table} SET quantity = quantity - $1 WHERE ${idColumn} = $2 AND item_name = $3`,
+            [quantity, ownerId, itemName]
+        );
+        await pool.query('COMMIT');
+        return { success: true };
+    } catch (e) {
+        await pool.query('ROLLBACK');
+        console.error('Error subtracting item from inventory, transaction rolled back:', e);
+        throw e;
+    }
+}
+
+async function returnInventory(ownerId, isShip = false) {
+    try {
+        const table = isShip ? 'ship_inventories' : 'player_inventories';
+        const idColumn = isShip ? 'ship_id' : 'player_id';
+
+        const res = await pool.query(
+            `SELECT item_name, quantity FROM ${table} WHERE ${idColumn} = $1`,
+            [ownerId]
+        );
+        return res.rows;
+    } catch (e) {
+        console.error('Error returning inventory:', e);
+        throw e;
+    }
+}
+
+async function changeGold(playerId, amount) {
+    try {
+        await pool.query('BEGIN');
+        const res = await pool.query(
+            'SELECT gold FROM players WHERE id = $1',
+            [playerId]
+        );
+        if (res.rows.length === 0 || res.rows[0].gold + amount < 0) {
+            await pool.query('ROLLBACK');
+            return { success: false, deficit: Math.abs(res.rows[0]?.gold + amount) };
+        }
+        await pool.query(
+            'UPDATE players SET gold = gold + $1 WHERE id = $2',
+            [amount, playerId]
+        );
+        await pool.query('COMMIT');
+        return { success: true };
+    } catch (e) {
+        await pool.query('ROLLBACK');
+        console.error('Error changing gold, transaction rolled back:', e);
+        throw e;
+    }
+}
+
+
+async function createTransaction(playerId, shipId, cityName, scheduledDate, actions) {
+    try {
+        const res = await pool.query(
+            'INSERT INTO transactions (player_id, ship_id, city_name, scheduled_date, actions) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+            [playerId, shipId, cityName, scheduledDate, actions]
+        );
+        return res.rows[0].id;
+    } catch (e) {
+        console.error('Error creating transaction:', e);
+        throw e;
+    }
+}
+
+async function getPendingTransactions() {
+    try {
+        const res = await pool.query(
+            "SELECT * FROM transactions WHERE status = 'pending' AND scheduled_date <= CURRENT_DATE"
+        );
+        return res.rows;
+    } catch (e) {
+        console.error('Error getting pending transactions:', e);
+        throw e;
+    }
+}
+
+async function updateTransactionStatus(transactionId, status) {
+    try {
+        await pool.query(
+            'UPDATE transactions SET status = $1 WHERE id = $2',
+            [status, transactionId]
+        );
+    } catch (e) {
+        console.error('Error updating transaction status:', e);
+        throw e;
+    }
+}
+
+async function addShip(playerId, name, speed, cargoSpace, attributes = {}) {
+    try {
+        const res = await pool.query(
+            'INSERT INTO ships (player_id, name, speed, cargo_space, attributes) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+            [playerId, name, speed, cargoSpace, attributes]
+        );
+        return res.rows[0].id;
+    } catch (e) {
+        console.error('Error adding ship:', e);
+        throw e;
+    }
+}
+
+async function removeShip(shipId) {
+    try {
+        const res = await pool.query(
+            'DELETE FROM ships WHERE id = $1 RETURNING id',
+            [shipId]
+        );
+        if (res.rowCount === 0) {
+            throw new Error('Ship not found. No deletion occurred.');
+        }
+        return true; // Ship deleted successfully
+    } catch (e) {
+        console.error(`Error deleting ship: ${e.message}`);
+        return false; // Indicate failure
+    }
+}
+
 async function populateDatabase() {
     await resetDatabase(true);
     await addItems();
@@ -309,6 +531,11 @@ async function populateDatabase() {
     await addItemTags();
     await addCities();
     await tagCities();
+    await createPlayer('Zorgmor','123')
+    await createPlayer('Mammoth','123')
+    await createPlayer('Gonzola','123')
+    await createPlayer('74747474','123')
+    await createPlayer('Zorgmor24','123')
     pool.end();
 }   //this function should be run on first time setup to populate the database with the dataObjects.json file
 
@@ -325,7 +552,10 @@ async function populateDatabase() {
 //addItemTags();
 //generatePriceSheet();
 //addCities();
-//populateDatabase();
+populateDatabase();
+//createPlayer('platedfungi','Fakepassword#44');
+//itemExists('Zerikanium')
+//addItemToInventory(3,"Zerikanium",5,false);
 
 // Example functions for debugging/reference
 //
