@@ -319,7 +319,7 @@ async function createPlayer(username, password) {
         const result = await pool.query('INSERT INTO players (username, password_hash) VALUES ($1, $2) RETURNING id', [username, hashedPassword]);
         const playerId = result.rows[0].id;
         await pool.query('COMMIT');
-        console.log('Player created with ID:', playerId);
+        return playerId;
     } catch (e) {
         await pool.query('ROLLBACK');
         console.error('Error creating player, transaction rolled back:', e);
@@ -359,7 +359,7 @@ async function itemExists(itemName) {
     }
     finally {
         //pool.end();
-        console.log("item exists");
+        
     }
 }
 
@@ -457,6 +457,21 @@ async function changeGold(playerId, amount) {
     }
 }
 
+async function getGold(playerId) {
+    try {
+        const res = await pool.query(
+            'SELECT gold FROM players WHERE id = $1',
+            [playerId]
+        );
+        if (res.rows.length === 0) {
+            throw new Error('Player not found');
+        }
+        return res.rows[0].gold;
+    } catch (e) {
+        console.error('Error getting gold:', e);
+        throw e;
+    }
+}
 
 async function createTransaction(playerId, shipId, cityName, scheduledDate, actions) {
     try {
@@ -524,6 +539,10 @@ async function removeShip(shipId) {
     }
 }
 
+async function poolClose() {
+    pool.end()
+}
+
 async function populateDatabase() {
     await resetDatabase(true);
     await addItems();
@@ -536,10 +555,39 @@ async function populateDatabase() {
     await createPlayer('Gonzola','123')
     await createPlayer('74747474','123')
     await createPlayer('Zorgmor24','123')
-    pool.end();
+    //pool.end();
 }   //this function should be run on first time setup to populate the database with the dataObjects.json file
 
 // async function adjustPriceSheet(name, goodAdjustments) {}   function will adjust the price sheet for a specific city based on a created goodsAdjustments object. Used for when a player takes an action that directly adjusts a price sheet
+
+
+module.exports = {
+    updatePriceSheets,
+    addItems,
+    addCityTags,
+    tagCity,
+    resetDatabase,
+    addCity,
+    tagCities,
+    addCities,
+    addItemTags,
+    generatePriceSheet,
+    createPlayer,
+    deletePlayer,
+    itemExists,
+    addItemToInventory,
+    subtractItemFromInventory,
+    returnInventory,
+    changeGold,
+    createTransaction,
+    getPendingTransactions,
+    updateTransactionStatus,
+    addShip,
+    removeShip,
+    populateDatabase,
+    poolClose,
+    getGold
+};
 
 
 //nudgePriceSheets();
@@ -552,56 +600,7 @@ async function populateDatabase() {
 //addItemTags();
 //generatePriceSheet();
 //addCities();
-populateDatabase();
+//populateDatabase();
 //createPlayer('platedfungi','Fakepassword#44');
 //itemExists('Zerikanium')
 //addItemToInventory(3,"Zerikanium",5,false);
-
-// Example functions for debugging/reference
-//
-//
-//
-//example function to get all cities
-// function nudgePriceSheets() {
-//     pool.query('SELECT name,price_sheet FROM cities', (err, res) => { //get all cities and their price sheets
-//         if (err) {
-//             console.error('Error selecting from cities:', err); //error handling
-//         } else {
-//             const cities = res.rows; //get the rows from the query
-//             for (const city of cities) { //iterate through the cities
-//                 console.log('Updating price sheet for:', city.name); //log the city name
-//                 const newPriceSheet = {...city.price_sheet}; //create a new price sheet object. Object parses to price_sheet, not priceSheet?
-//                 Object.keys(newPriceSheet).forEach(good => { //iterate through the goods in the price sheet
-//                     //console.log(good, " ", newPriceSheet[good].price); 
-//                     const oldPrice = newPriceSheet[good].price; //get the old price
-//                     const newPrice = priceChanger(oldPrice); //calculate the new price
-//                     console.log(good, " ", oldPrice, "->", newPrice); //log the good, old price, and new price
-//                     newPriceSheet[good].price = newPrice; //update the price in the new price sheet
-//                 })
-//                 console.log(newPriceSheet);
-//             }
-
-//             //function will then have to update the price sheet in the database, using a transaction for data integrity
-//         }
-//         pool.end();
-// });}
-
-// async function addCitiesFromConfig() {
-//     //just using this for now, will write a better function later
-//     const data = JSON.parse(fs.readFileSync('./dataObjects.json'));
-//     const cities = data.cityList;
-//     console.log(cities[0].name);
-//     addCities(cities[0].name, cities[0].priceSheet);
-// }
-
-//super basic test of connecting to the database, now time to learn schema and queries
-// (async () => {
-//     try {
-//       const res = await pool.query("SELECT NOW()");
-//       console.log('Database connected:', res.rows[0]);
-//     } catch (err) {
-//       console.error('Database connection error:', err);
-//     } finally {
-//       await pool.end();
-//     }
-//   })();

@@ -5,9 +5,9 @@ class TransactionManager {
         this.transactions = [];
     }
 
-    async addTransaction(playerId, shipId, portName, scheduledDate, actions) {
+    async addTransaction(playerId, shipId, cityName, scheduledDate, actions) {
         try {
-            const transactionId = await dbHandler.createTransaction(playerId, shipId, portName, scheduledDate, actions);
+            const transactionId = await dbHandler.createTransaction(playerId, shipId, cityName, scheduledDate, actions);
             console.log(`Transaction created with ID: ${transactionId}`);
         } catch (e) {
             console.error('Error creating transaction:', e);
@@ -16,6 +16,7 @@ class TransactionManager {
 
     async processPendingTransactions() {
         try {
+            console.log("doing it")
             const transactions = await dbHandler.getPendingTransactions();
             for (const transaction of transactions) {
                 try {
@@ -32,22 +33,90 @@ class TransactionManager {
     }
 
     async processTransaction(transaction) {
-        const actions = transaction.actions;
+        const actions = transaction.actions.action;
         for (const action of actions) {
-            switch (action.type) {
-                case 'subtract':
-                    await dbHandler.subtractItemFromInventory(transaction.player_id, action.itemName, action.quantity);
-                    break;
-                case 'add':
-                    await dbHandler.addItemToInventory(transaction.player_id, action.itemName, action.quantity);
-                    break;
-                case 'changeGold':
-                    await dbHandler.changeGold(transaction.player_id, action.amount);
-                    break;
-                // Add more cases as needed
-                default:
-                    throw new Error('Invalid action type');
+            try {
+                switch (action.type) {
+                    case 'buy':
+                        await this.handleBuyAction(transaction, action);
+                        break;
+                    case 'sell':
+                        await this.handleSellAction(transaction, action);
+                        break;
+                    case 'subtract':
+                        await this.handleSubtractAction(transaction, action);
+                        break;
+                    case 'add':
+                        await this.handleAddAction(transaction, action);
+                        break;
+                    case 'changeGold':
+                        await this.handleChangeGoldAction(transaction, action);
+                        break;
+                    // Add more cases as needed
+                    default:
+                        throw new Error('Invalid action type');
+                }
+            } catch (e) {
+                console.error(`Error processing action ${action.type}:`, e);
+                throw e;
             }
+        }
+    }
+
+    async handleBuyAction(transaction, action) {
+        const { itemName, quantity, pricePerUnit } = action;
+        const totalCost = pricePerUnit * quantity;
+        //console.log(itemName,quantity,pricePerUnit);
+        // Subtract gold from player
+        const goldResult = await dbHandler.changeGold(transaction.player_id, -totalCost);
+        if (!goldResult.success) {
+            console.warn(`Not enough gold to buy ${quantity} ${itemName}. Deficit: ${goldResult.deficit}`);
+            // Handle deficit case if needed
+            return;
+        }
+
+        // Add item to ship inventory
+        
+        const addItemResult = await dbHandler.addItemToInventory(transaction.ship_id, itemName, quantity, true);
+        //console.log(addItemResult)
+        // Handle cases where there's not enough storage space if needed
+    }
+
+    async handleSellAction(transaction, action) {
+        const { itemName, quantity, pricePerUnit } = action;
+        const totalRevenue = pricePerUnit * quantity;
+
+        // Subtract item from ship inventory
+        const subtractItemResult = await dbHandler.subtractItemFromInventory(transaction.ship_id, itemName, quantity, true);
+        if (!subtractItemResult.success) {
+            console.warn(`Not enough ${itemName} to sell. Deficit: ${subtractItemResult.deficit}`);
+            // Handle deficit case if needed
+            return;
+        }
+
+        // Add gold to player
+        const goldResult = await dbHandler.changeGold(transaction.player_id, totalRevenue);
+        // Handle cases where there's not enough storage space if needed
+    }
+
+    async handleSubtractAction(transaction, action) {
+        const result = await dbHandler.subtractItemFromInventory(transaction.ship_id, action.itemName, action.quantity, true);
+        if (!result.success) {
+            console.warn(`Not enough ${action.itemName} to subtract. Deficit: ${result.deficit}`);
+            // Handle deficit case if needed
+        }
+    }
+
+    async handleAddAction(transaction, action) {
+        const result = await dbHandler.addItemToInventory(transaction.ship_id, action.itemName, action.quantity, true);
+        // Handle cases where there's not enough storage space if needed
+    }
+
+    async handleChangeGoldAction(transaction, action) {
+        const result = await dbHandler.changeGold(transaction.player_id, action.amount);
+        if (!result.success) {
+            console.warn(`Not enough gold to subtract. Deficit: ${result.deficit}`);
+            // Handle deficit case if needed
         }
     }
 
