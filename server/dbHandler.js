@@ -640,6 +640,47 @@ async function handleShipReturn(shipId) {
     }
 }
 
+//factory prodSheets should be formatted as such:
+// prod = {
+//     price: [
+//         {good: "name",quantity: 1},
+//         {good: "name",quantity: 1},
+//         {good: "name",quantity: 1}
+//     ],
+//     output: [
+//         {good: "name",quantity: 1}
+//     ]
+// }
+
+
+async function addFactory(name,playerId,prodSheet) {
+    try {
+        const res = await pool.query('INSERT INTO factories (name, player_id,production_sheet) VALUES ($1,$2,$3) RETURNING id',
+            [name,playerId,prodSheet]);
+        console.log(`Factory added at ${res.rows[0].id}`);
+        return(res);
+    } catch (e) {
+        console.error('Error adding factory:',e);
+        throw e;
+    }
+}
+async function deleteFactory(factoryId){
+    try {
+        const res = await pool.query(
+            'DELETE FROM factories WHERE id = $1 RETURNING id',
+            [factoryId]
+        );
+        if (res.rowCount === 0) {
+            throw new Error('Factory not found. No deletion occurred.');
+        }
+        console.log("Factory deleted successfully.")
+        return true; // Factory deleted successfully
+    } catch (e) {
+        console.error(`Error deleting factory: ${e.message}`);
+        return false; // Indicate failure
+    }
+}
+
 async function populateDatabase() {
     await resetDatabase(true);
     await addItems();
@@ -688,7 +729,9 @@ module.exports = {
     getGoodPrice,
     getShip,
     updateShipStatus,
-    handleShipReturn
+    handleShipReturn,
+    addFactory,
+    deleteFactory
 };
 
 

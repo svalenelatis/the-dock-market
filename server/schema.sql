@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS city_tags, item_tag_goods, item_tags, cities, items, players, player_inventories, transactions, ships, ship_inventories CASCADE;
+DROP TABLE IF EXISTS city_tags, item_tag_goods, item_tags, cities, items, players, player_inventories, transactions, ships, ship_inventories, factories CASCADE;
 
 
 -- Items Table
@@ -85,3 +85,10 @@ CREATE TABLE ship_inventories (
     quantity INT DEFAULT 0,
     PRIMARY KEY (ship_id, item_name)
 );
+
+CREATE TABLE factories (
+    id SERIAL PRIMARY KEY,
+    player_id INT REFERENCES players(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    production_sheet JSONB NOT NULL
+)

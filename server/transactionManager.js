@@ -20,6 +20,7 @@ class TransactionManager {
             console.log(`Transaction created with ID: ${transactionId}`);
         } catch (e) {
             console.error('Error creating transaction:', e);
+            return(false);
         }
     }
 
