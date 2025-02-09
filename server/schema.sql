@@ -45,7 +45,7 @@ CREATE TABLE players (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    gold NUMERIC(10,2) DEFAULT 2000.00 NOT NULL,
+    gold NUMERIC(10,2) DEFAULT 1000.00 NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -64,7 +64,8 @@ CREATE TABLE transactions (
     scheduled_date DATE,
     actions JSONB NOT NULL,
     status VARCHAR(20) DEFAULT 'pending', -- pending, completed, failed
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    needs_return BOOLEAN DEFAULT TRUE
 );
 
 CREATE TABLE ships (
@@ -74,7 +75,8 @@ CREATE TABLE ships (
     speed NUMERIC(10,2) NOT NULL,
     cargo_space INT NOT NULL,
     attributes JSONB DEFAULT '{}', -- For storing additional attributes like unique abilities
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'ready'
 );
 
 CREATE TABLE ship_inventories (

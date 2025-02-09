@@ -5,23 +5,51 @@ class TransactionManager {
         this.transactions = [];
     }
 
-    async addTransaction(playerId, shipId, cityName, scheduledDate, actions) {
+    async addTransaction(playerId, shipId, cityName, scheduledDate, actions, needsReturn = true) {
         try {
-            const transactionId = await dbHandler.createTransaction(playerId, shipId, cityName, scheduledDate, actions);
+            // Check if the ship is ready
+            const ship = await dbHandler.getShip(shipId);
+            if (ship.status !== 'ready') {
+                throw new Error('Ship is not ready for a new transaction');
+            }
+
+            // Update ship status to busy
+            await dbHandler.updateShipStatus(shipId, 'busy');
+
+            const transactionId = await dbHandler.createTransaction(playerId, shipId, cityName, scheduledDate, actions, needsReturn);
             console.log(`Transaction created with ID: ${transactionId}`);
         } catch (e) {
             console.error('Error creating transaction:', e);
         }
     }
 
+    async addReturnTransaction(playerId, shipId, cityName, scheduledDate) {
+        try {
+            const returnActions = { action: [{ type: 'return' }] };
+            const transactionId = await dbHandler.createTransaction(playerId, shipId, cityName, scheduledDate, returnActions, false);
+            console.log(`Return transaction created with ID: ${transactionId}`);
+        } catch (e) {
+            console.error('Error creating return transaction:', e);
+        }
+    }
+
     async processPendingTransactions() {
         try {
-            console.log("doing it")
             const transactions = await dbHandler.getPendingTransactions();
             for (const transaction of transactions) {
                 try {
                     await this.processTransaction(transaction);
                     await dbHandler.updateTransactionStatus(transaction.id, 'completed');
+
+                    if (transaction.needs_return) {
+                        // Calculate return date based on the scheduled date
+                        const scheduledDate = new Date(transaction.scheduled_date);
+                        const returnDate = new Date(scheduledDate.getTime() + (scheduledDate.getTime() - Date.now()));
+
+                        // Schedule a return transaction
+                        await this.addReturnTransaction(transaction.player_id, transaction.ship_id, transaction.city_name, returnDate);
+                    }
+
                 } catch (e) {
                     console.error('Error processing transaction:', e);
                     await dbHandler.updateTransactionStatus(transaction.id, 'failed');
@@ -52,6 +80,9 @@ class TransactionManager {
                     case 'changeGold':
                         await this.handleChangeGoldAction(transaction, action);
                         break;
+                    case 'return':
+                        await this.handleReturnAction(transaction);
+                        break;
                     // Add more cases as needed
                     default:
                         throw new Error('Invalid action type');
@@ -64,60 +95,91 @@ class TransactionManager {
     }
 
     async handleBuyAction(transaction, action) {
-        const { itemName, quantity, pricePerUnit } = action;
-        const totalCost = pricePerUnit * quantity;
-        //console.log(itemName,quantity,pricePerUnit);
+        let { itemName, quantity } = action;
+        const itemData = await dbHandler.getGoodPrice(transaction.city_name, itemName);
+        const pricePerUnit = itemData.price;
+        let totalCost = pricePerUnit * quantity;
+
+        // Check player's gold
+        const playerGold = await dbHandler.getGold(transaction.player_id);
+        if (playerGold < totalCost) {
+            const affordableQuantity = Math.floor(playerGold / pricePerUnit);
+            totalCost = pricePerUnit * affordableQuantity;
+            console.log(`Tried to afford ${quantity}, only could afford ${affordableQuantity}`)
+            quantity = affordableQuantity;
+            
+        }
+        else{
+            console.log(`Bought ${quantity} of ${itemName} at ${totalCost}`)
+        }
+
         // Subtract gold from player
         const goldResult = await dbHandler.changeGold(transaction.player_id, -totalCost);
         if (!goldResult.success) {
-            console.warn(`Not enough gold to buy ${quantity} ${itemName}. Deficit: ${goldResult.deficit}`);
-            // Handle deficit case if needed
+            console.log("Something went wrong, gold didn't come back right")
             return;
         }
 
+        // Check ship's available space
+        const shipInventory = await dbHandler.returnInventory(transaction.ship_id, true);
+        const ship = await dbHandler.getShip(transaction.ship_id);
+        const currentSpaceUsed = shipInventory.reduce((acc, item) => acc + item.quantity, 0);
+        const availableSpace = ship.cargo_space - currentSpaceUsed;
+        if (availableSpace < quantity) {
+            const previousCost = totalCost;
+            const oldQuantity = quantity;
+            quantity = availableSpace;
+            totalCost = pricePerUnit * quantity;
+            const refund = previousCost - totalCost;
+            console.log(`Not enough room. Sold back ${oldQuantity-quantity} for ${refund}`)
+            await dbHandler.changeGold(transaction.player_id, refund); // Refund the difference
+        }
+
         // Add item to ship inventory
-        
-        const addItemResult = await dbHandler.addItemToInventory(transaction.ship_id, itemName, quantity, true);
-        //console.log(addItemResult)
-        // Handle cases where there's not enough storage space if needed
+        await dbHandler.addItemToInventory(transaction.ship_id, itemName, quantity, true);
     }
 
     async handleSellAction(transaction, action) {
-        const { itemName, quantity, pricePerUnit } = action;
-        const totalRevenue = pricePerUnit * quantity;
+        let { itemName, quantity } = action;
+        const itemData = await dbHandler.getGoodPrice(transaction.city_name, itemName);
+        const pricePerUnit = itemData.price;
+        let totalRevenue = pricePerUnit * quantity;
 
         // Subtract item from ship inventory
         const subtractItemResult = await dbHandler.subtractItemFromInventory(transaction.ship_id, itemName, quantity, true);
         if (!subtractItemResult.success) {
-            console.warn(`Not enough ${itemName} to sell. Deficit: ${subtractItemResult.deficit}`);
-            // Handle deficit case if needed
-            return;
+            const availableQuantity = quantity - subtractItemResult.deficit;
+            const newQuantity = availableQuantity;
+            totalRevenue = pricePerUnit * newQuantity;
+            console.log(`Tried to sell ${quantity}, only could sell ${availableQuantity} at ${totalRevenue}`)
         }
-
+        else{
+            console.log(`Sold ${quantity} of ${itemName} at ${totalRevenue}`)
+        }
         // Add gold to player
-        const goldResult = await dbHandler.changeGold(transaction.player_id, totalRevenue);
-        // Handle cases where there's not enough storage space if needed
+        await dbHandler.changeGold(transaction.player_id, totalRevenue);
     }
 
     async handleSubtractAction(transaction, action) {
         const result = await dbHandler.subtractItemFromInventory(transaction.ship_id, action.itemName, action.quantity, true);
         if (!result.success) {
-            console.warn(`Not enough ${action.itemName} to subtract. Deficit: ${result.deficit}`);
             // Handle deficit case if needed
         }
     }
 
     async handleAddAction(transaction, action) {
-        const result = await dbHandler.addItemToInventory(transaction.ship_id, action.itemName, action.quantity, true);
-        // Handle cases where there's not enough storage space if needed
+        await dbHandler.addItemToInventory(transaction.ship_id, action.itemName, action.quantity, true);
     }
 
     async handleChangeGoldAction(transaction, action) {
         const result = await dbHandler.changeGold(transaction.player_id, action.amount);
         if (!result.success) {
-            console.warn(`Not enough gold to subtract. Deficit: ${result.deficit}`);
             // Handle deficit case if needed
         }
+    }
+
+    async handleReturnAction(transaction) {
+        await dbHandler.handleShipReturn(transaction.ship_id);
     }
 
     async transferItem(playerId, targetPlayerId, itemName, quantity) {
@@ -131,11 +193,8 @@ class TransactionManager {
     }
 
     async tradeItems(playerId, targetPlayerId, itemName, quantity) {
-        // Implement trade logic here, possibly involving gold transactions as well
         try {
-            // Example trade logic
             await this.transferItem(playerId, targetPlayerId, itemName, quantity);
-            // Add additional trade logic if needed
         } catch (e) {
             console.error('Error trading items:', e);
             throw e;

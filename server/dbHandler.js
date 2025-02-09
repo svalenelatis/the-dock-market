@@ -70,6 +70,35 @@ async function updatePriceSheets() {  //the main, async function to run the pric
     }
 }
 
+async function getPriceSheet(cityName) {
+    try {
+        const res = await pool.query(
+            'SELECT price_sheet FROM cities WHERE name = $1',
+            [cityName]
+        );
+        if (res.rows.length === 0) {
+            throw new Error('City not found');
+        }
+        return res.rows[0].price_sheet;
+    } catch (e) {
+        console.error('Error getting price sheet:', e);
+        throw e;
+    }
+}
+
+async function getGoodPrice(cityName, itemName) {
+    try {
+        const priceSheet = await getPriceSheet(cityName);
+        if (!priceSheet[itemName]) {
+            throw new Error(`Price for item ${itemName} not found in city ${cityName}`);
+        }
+        return priceSheet[itemName];
+    } catch (e) {
+        console.error(`Error getting price for ${itemName} in ${cityName}:`, e);
+        throw e;
+    }
+}
+
 function jitter(value,factor) {
     const jit = (Math.random() * 2 - 1) * factor;
     return value + jit;
@@ -365,6 +394,11 @@ async function itemExists(itemName) {
 
 async function addItemToInventory(ownerId, itemName, quantity, isShip = false) {
     try {
+        if (quantity <= 0) {
+            console.warn(`Attempted to add a non-positive quantity (${quantity}) of ${itemName} to inventory.`);
+            return 0; // No operation performed
+        }
+
         if (!await itemExists(itemName)) {
             throw new Error(`Item with name ${itemName} does not exist`);
         }
@@ -388,6 +422,11 @@ async function addItemToInventory(ownerId, itemName, quantity, isShip = false) {
 
 async function subtractItemFromInventory(ownerId, itemName, quantity, isShip = false) {
     try {
+        if (quantity <= 0) {
+            console.warn(`Attempted to subtract a non-positive quantity (${quantity}) of ${itemName} from inventory.`);
+            return { success: false, deficit: 0 }; // No operation performed
+        }
+
         if (!await itemExists(itemName)) {
             throw new Error(`Item with name ${itemName} does not exist`);
         }
@@ -404,10 +443,20 @@ async function subtractItemFromInventory(ownerId, itemName, quantity, isShip = f
             await pool.query('ROLLBACK');
             return { success: false, deficit: quantity - (res.rows[0]?.quantity || 0) };
         }
-        await pool.query(
-            `UPDATE ${table} SET quantity = quantity - $1 WHERE ${idColumn} = $2 AND item_name = $3`,
-            [quantity, ownerId, itemName]
-        );
+
+        const newQuantity = res.rows[0].quantity - quantity;
+        if (newQuantity === 0) {
+            await pool.query(
+                `DELETE FROM ${table} WHERE ${idColumn} = $1 AND item_name = $2`,
+                [ownerId, itemName]
+            );
+        } else {
+            await pool.query(
+                `UPDATE ${table} SET quantity = $1 WHERE ${idColumn} = $2 AND item_name = $3`,
+                [newQuantity, ownerId, itemName]
+            );
+        }
+
         await pool.query('COMMIT');
         return { success: true };
     } catch (e) {
@@ -473,11 +522,11 @@ async function getGold(playerId) {
     }
 }
 
-async function createTransaction(playerId, shipId, cityName, scheduledDate, actions) {
+async function createTransaction(playerId, shipId, cityName, scheduledDate, actions, needsReturn) {
     try {
         const res = await pool.query(
-            'INSERT INTO transactions (player_id, ship_id, city_name, scheduled_date, actions) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-            [playerId, shipId, cityName, scheduledDate, actions]
+            'INSERT INTO transactions (player_id, ship_id, city_name, scheduled_date, actions, needs_return) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+            [playerId, shipId, cityName, scheduledDate, actions, needsReturn]
         );
         return res.rows[0].id;
     } catch (e) {
@@ -543,6 +592,54 @@ async function poolClose() {
     pool.end()
 }
 
+async function getShip(id) {
+    try {
+        const res = await pool.query('SELECT * FROM ships WHERE id = $1', [id]);
+        if (res.rows.length === 0) {
+            throw new Error('Ship not found');
+        }
+        return res.rows[0];
+    } catch (e) {
+        console.error('Error getting ship:', e);
+        throw e;
+    }
+}
+
+async function updateShipStatus(shipId, status) {
+    try {
+        await pool.query(
+            'UPDATE ships SET status = $1 WHERE id = $2',
+            [status, shipId]
+        );
+    } catch (e) {
+        console.error('Error updating ship status:', e);
+        throw e;
+    }
+}
+
+async function handleShipReturn(shipId) {
+    try {
+        await pool.query('BEGIN');
+        const ship = await getShip(shipId);
+        const playerId = ship.player_id;
+        // Transfer goods from ship to player inventory
+        const shipInventory = await returnInventory(shipId, true);
+        for (const item of shipInventory) {
+            await addItemToInventory(playerId, item.item_name, item.quantity);
+            await subtractItemFromInventory(shipId, item.item_name, item.quantity, true);
+        }
+
+        // Update ship status to available
+        await updateShipStatus(shipId, 'ready');
+
+        await pool.query('COMMIT');
+    } catch (e) {
+        await pool.query('ROLLBACK');
+        console.error('Error handling ship return, transaction rolled back:', e);
+        throw e;
+    }
+}
+
 async function populateDatabase() {
     await resetDatabase(true);
     await addItems();
@@ -586,7 +683,12 @@ module.exports = {
     removeShip,
     populateDatabase,
     poolClose,
-    getGold
+    getGold,
+    getPriceSheet,
+    getGoodPrice,
+    getShip,
+    updateShipStatus,
+    handleShipReturn
 };
 
 
