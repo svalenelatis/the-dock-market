@@ -4,53 +4,80 @@ const TransactionManager = require('./transactionManager');
 
 const transactionManager = new TransactionManager();
 
-async function runShipSchedulingTests() {
+async function runFactoryTests() {
     try {
-        console.log('Starting ship scheduling tests...');
+        console.log('Starting factory tests...');
 
         // Reset and populate the database
         console.log('Resetting and populating the database...');
         await dbHandler.populateDatabase();
         console.log('Database populated.');
 
-        // Create test player and ship
-        console.log('Creating test player and ship...');
+        // Create test player
+        console.log('Creating test player...');
         const playerId = await dbHandler.createPlayer('testPlayer', 'password123');
-        const shipId = await dbHandler.addShip(playerId, 'Test Ship', 10, 100);
-        console.log('Player and ship created with IDs:', playerId, shipId);
+        console.log('Player created with ID:', playerId);
 
-        // Add initial gold to player
-        console.log('Adding initial gold to player...');
-        await dbHandler.changeGold(playerId, 1000); // Add 1000 gold to player
-        console.log('Initial gold added.');
+        // Add initial goods to player's inventory
+        console.log('Adding initial goods to player\'s inventory...');
+        await dbHandler.addItemToInventory(playerId, 'Grain', 10);
+        await dbHandler.addItemToInventory(playerId, 'Livestock', 5);
+        await dbHandler.addItemToInventory(playerId, 'Water', 20);
+        console.log('Initial goods added.');
 
-        // Check initial player inventory and gold
-        console.log('Checking initial player inventory and gold...');
+        // Check initial player inventory
+        console.log('Checking initial player inventory...');
         let playerInventory = await dbHandler.returnInventory(playerId);
-        let playerGold = await dbHandler.getGold(playerId); // Get current gold
         console.log('Initial Player Inventory:', playerInventory);
-        console.log('Initial Player Gold:', playerGold);
 
-        prod = { 
-            price : [
-                {good: 'Grain',quantity: 1},
-                {good: 'Livestock',quantity: 1},
-                {good: 'Water',quantity: 1}
+        // Define production sheet for the factory
+        const prodSheet = {
+            price: [
+                { good: 'Grain', quantity: 1 },
+                { good: 'Livestock', quantity: 1 },
+                { good: 'Water', quantity: 1 }
             ],
-            output : [
-                {good: 'Rations',quantity: 2}
+            output: [
+                { good: 'Rations', quantity: 2 }
             ]
-        }
+        };
 
-        console.log('Adding factory to player');
-        let factoryId = await dbHandler.addFactory('Ration Factory',playerId,prod);
+        // Add factory to player
+        console.log('Adding factory to player...');
+        const factoryId = await dbHandler.addFactory('Ration Factory', playerId, prodSheet);
+        console.log('Factory added with ID:', factoryId);
+
+        // Add another factory with insufficient goods
+        console.log('Adding another factory with insufficient goods...');
+        const insufficientProdSheet = {
+            price: [
+                { good: 'Grain', quantity: 100 }, // Insufficient quantity
+                { good: 'Livestock', quantity: 1 },
+                { good: 'Water', quantity: 1 }
+            ],
+            output: [
+                { good: 'Rations', quantity: 2 }
+            ]
+        };
+        const insufficientFactoryId = await dbHandler.addFactory('Insufficient Factory', playerId, insufficientProdSheet);
+        console.log('Factory with insufficient goods added with ID:', insufficientFactoryId);
+
+        // Run processFactories to process the factory production
+        console.log('Processing factories...');
+        await dbHandler.processFactories();
+        console.log('Factories processed.');
+
+        // Check player inventory after processing factories
+        console.log('Checking player inventory after processing factories...');
+        playerInventory = await dbHandler.returnInventory(playerId);
+        console.log('Player Inventory after processing factories:', playerInventory);
 
     } catch (e) {
-        console.error('Error running ship scheduling tests:', e);
+        console.error('Error running factory tests:', e);
     } finally {
         await dbHandler.poolClose();
-        console.log('Ship scheduling tests completed.');
+        console.log('Factory tests completed.');
     }
 }
 
-runShipSchedulingTests();
+runFactoryTests();

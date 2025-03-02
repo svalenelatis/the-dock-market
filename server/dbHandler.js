@@ -70,6 +70,43 @@ async function updatePriceSheets() {  //the main, async function to run the pric
     }
 }
 
+async function processFactories() {
+    try {
+        const res = await pool.query('SELECT player_id, production_sheet FROM factories');
+        const factories = res.rows;
+
+        for (const factory of factories) {
+            const player = factory.player_id;
+            const price = factory.production_sheet.price;
+
+            try {
+                if (price.length > 0) {
+                    for (const item of price) {
+                        const { good, quantity } = item;
+                        const result = await subtractItemFromInventory(player, good, quantity);
+                        if (!result.success) {
+                            throw new Error(`Insufficient ${good} in inventory for player ${player}`);
+                        }
+                    }
+                }
+
+                const output = factory.production_sheet.output;
+                for (const item of output) {
+                    const { good, quantity } = item;
+                    await addItemToInventory(player, good, quantity);
+                    console.log("Successfully added item to inventory.");
+                }
+                //console.log(player, price);
+            } catch (e) {
+                console.error(`Error processing factory for player ${player}. Probably not enough goods.`);
+                continue; // Skip to the next factory
+            }
+        }
+    } catch (e) {
+        console.error('Error processing factories:', e);
+    }
+}
+
 async function getPriceSheet(cityName) {
     try {
         const res = await pool.query(
@@ -658,7 +695,7 @@ async function addFactory(name,playerId,prodSheet) {
         const res = await pool.query('INSERT INTO factories (name, player_id,production_sheet) VALUES ($1,$2,$3) RETURNING id',
             [name,playerId,prodSheet]);
         console.log(`Factory added at ${res.rows[0].id}`);
-        return(res);
+        return(res.rows[0].id);
     } catch (e) {
         console.error('Error adding factory:',e);
         throw e;
@@ -696,7 +733,6 @@ async function populateDatabase() {
     //pool.end();
 }   //this function should be run on first time setup to populate the database with the dataObjects.json file
 
-// async function adjustPriceSheet(name, goodAdjustments) {}   function will adjust the price sheet for a specific city based on a created goodsAdjustments object. Used for when a player takes an action that directly adjusts a price sheet
 
 
 module.exports = {
@@ -731,7 +767,8 @@ module.exports = {
     updateShipStatus,
     handleShipReturn,
     addFactory,
-    deleteFactory
+    deleteFactory,
+    processFactories
 };
 
 
@@ -749,3 +786,13 @@ module.exports = {
 //createPlayer('platedfungi','Fakepassword#44');
 //itemExists('Zerikanium')
 //addItemToInventory(3,"Zerikanium",5,false);
+// prod = {
+//     price: [
+//         {good: "Cows",quantity:1}
+//     ],
+//     output: [
+//         {good: "Grain",quantity: 1}
+//     ]
+// }
+//addFactory('Grain-Cow Factory',1,prod)
+//processFactories();

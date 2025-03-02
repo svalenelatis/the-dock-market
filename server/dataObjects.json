@@ -9,30 +9,21 @@
         "basePrice" : "number",
         "components" : ["optionalString"]
     }},
-    {"cityTag": {
-        "name" : "string",
-        "description" : "string",
+    {
+        "name" : "tag name",
+        "description" : "description of tag",
         "effects" : {
             "goods" : {
-                "Grain" : 0.0,
-                "Livestock" : 0.0,
-                "Water" : 0.0,
-                "Textiles" : 0.0,
-                "Metal" : 0.0,
-                "Stone" : 0.0,
-                "Wood" : 0.0,
-                "Gold" : 0.0,
-                "Silver" : 0.0,
-                "Gemstones" : 0.0,
-                "Zerikanium" : 0.0,
-                "Weapons" : 0.0,
-                "Tools" : 0.0,
-                "Clothing" : 0.0,
-                "Rations" : 0.0,
-                "Building Materials" : 0.0
-            
-            }}
-    }},
+                "Grain" : -0.1,
+                "Livestock" : -0.1,
+                "Wood" : -0.1,
+                "Water" : 0.1,
+                "Tools" : 0.1
+            },
+            "tags" : {
+                "Food" : 0.1
+            }
+        }},
     {"itemTag": {
         "name" : "string",
         "goods" : ["string"],
@@ -310,6 +301,9 @@
         "name" : "Drought",
         "description" : "A drought has hit the island, causing food prices to rise.",
         "effects" : {
+            "goods": {
+                "Wood" : 0.05
+            },
             "tags" : {
                 "Food" : 0.05
             }
@@ -319,8 +313,204 @@
         "name" : "Bountiful Harvest",
         "description" : "A bountiful harvest has caused food prices to drop.",
         "effects" : {
+            "goods": {
+                "Wood" : 0.05
+            },
             "tags" : {
-                "Food" : -0.05
+                "Food" : 0.05
+            }
+        }
+    },
+    {
+        "name": "Desert Caravan",
+        "description": "A large merchant caravan has arrived, increasing the supply of exotic goods.",
+        "effects": {
+            "tags": {
+                "Luxury Goods": -0.03,
+                "Spices": -0.02
+            }
+        }
+    },
+    {
+        "name": "Market Fire",
+        "description": "A fire in the central market has destroyed some goods, reducing supply.",
+        "effects": {
+            "tags": {
+                "Raw Materials": 0.04,
+                "Food": 0.03
+            }
+        }
+    },
+    {
+        "name": "High Tides",
+        "description": "Exceptionally high tides have made fishing more difficult, reducing seafood supply.",
+        "effects": {
+            "goods": {
+                "Rations": 0.03
+            },
+            "tags": {
+                "Food": 0.02
+            }
+        }
+    },
+    {
+        "name": "Counterfeit Currency",
+        "description": "A counterfeit currency scandal has made merchants wary, increasing the price of valuable goods.",
+        "effects": {
+            "tags": {
+                "Precious Metals": 0.03
+            }
+        }
+    },
+    {
+        "name": "Architect’s Commission",
+        "description": "A wealthy noble has ordered new buildings, raising demand for construction materials.",
+        "effects": {
+            "tags": {
+                "Building Materials": 0.04
+            }
+        }
+    },
+    {
+        "name": "Guild Regulation",
+        "description": "A trade guild has imposed new regulations, slightly raising the price of manufactured goods.",
+        "effects": {
+            "tags": {
+                "Refined Materials": 0.02
+            }
+        }
+    },
+    {
+        "name": "Surplus Harvest",
+        "description": "An unusually good harvest has caused a surplus of grains and produce.",
+        "effects": {
+            "tags": {
+                "Food": -0.04
+            }
+        }
+    },
+    {
+        "name": "Drunken Festival",
+        "description": "A local festival has driven up alcohol consumption and demand for entertainment goods.",
+        "effects": {
+            "tags": {
+                "Alcohol": 0.03,
+                "Luxury Goods": 0.02
+            }
+        }
+    },
+    {
+        "name": "Storm at Sea",
+        "description": "A major storm has delayed merchant ships, reducing supply of imported goods.",
+        "effects": {
+            "tags": {
+                "Imported Goods": 0.03
+            }
+        }
+    },
+    {
+        "name": "Plague Outbreak",
+        "description": "A minor plague outbreak has increased demand for medicinal supplies.",
+        "effects": {
+            "tags": {
+                "Medicine": 0.05
+            }
+        }
+    },
+    {
+        "name": "Flooded Farmlands",
+        "description": "Heavy rains have flooded farmlands, causing crop shortages.",
+        "effects": {
+            "tags": {
+                "Food": 0.03
+            }
+        }
+    },
+    {
+        "name": "Drought Conditions",
+        "description": "A lack of rain has caused water shortages, affecting agriculture and industry.",
+        "effects": {
+            "tags": {
+                "Food": 0.03,
+                "Raw Materials": 0.02
+            }
+        }
+    },
+    {
+        "name": "Merchant Tax",
+        "description": "New government taxes on merchants have slightly increased trade costs.",
+        "effects": {
+            "tags": {
+                "All Goods": 0.01
+            }
+        }
+    },
+    {
+        "name": "Black Market Surge",
+        "description": "Illegal trade has undercut official markets, reducing prices of certain goods.",
+        "effects": {
+            "tags": {
+                "Luxury Goods": -0.02,
+                "Weapons": -0.02
+            }
+        }
+    },
+    {
+        "name": "Mystic’s Prophecy",
+        "description": "A traveling mystic's prediction has caused panic buying of certain valuables.",
+        "effects": {
+            "tags": {
+                "Precious Metals": 0.03,
+                "Gemstones": 0.02
+            }
+        }
+    },
+    {
+        "name": "New Trade Agreement",
+        "description": "A treaty has opened up new trade routes, slightly increasing the supply of imports.",
+        "effects": {
+            "tags": {
+                "Imported Goods": -0.02
+            }
+        }
+    },
+    {
+        "name": "Cattle Disease",
+        "description": "A livestock disease has reduced the supply of meat and leather.",
+        "effects": {
+            "tags": {
+                "Food": 0.02,
+                "Leather Goods": 0.03
+            }
+        }
+    },
+    {
+        "name": "Mine Collapse",
+        "description": "A tragic mine collapse has decreased ore production, raising metal prices.",
+        "effects": {
+            "tags": {
+                "Raw Materials": 0.03,
+                "Refined Materials": 0.02
+            }
+        }
+    },
+    {
+        "name": "Alchemy Breakthrough",
+        "description": "Alchemists have discovered a new refining method, slightly increasing production of rare goods.",
+        "effects": {
+            "tags": {
+                "Refined Materials": -0.02,
+                "Medicine": -0.01
+            }
+        }
+    },
+    {
+        "name": "Theater Craze",
+        "description": "A popular play has driven up demand for fine clothing and entertainment goods.",
+        "effects": {
+            "tags": {
+                "Clothing": 0.03,
+                "Luxury Goods": 0.02
             }
         }
     }
