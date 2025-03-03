@@ -70,6 +70,49 @@ async function updatePriceSheets() {  //the main, async function to run the pric
     }
 }
 
+async function addRandomTagsToCities() {
+    try {
+        const citiesRes = await pool.query('SELECT id, name, tags FROM cities');
+        const cities = citiesRes.rows;
+
+        const randomTagsRes = await pool.query('SELECT name FROM city_tags WHERE random = TRUE');
+        const randomTags = randomTagsRes.rows.map(row => row.name);
+
+        for (const city of cities) {
+            if (Math.random() < 0.25) { // 10% chance to add a random tag
+                const randomTag = randomTags[Math.floor(Math.random() * randomTags.length)];
+                if (!city.tags.includes(randomTag)) {
+                    await tagCity('add', randomTag, city.name);
+                    console.log(`Added random tag ${randomTag} to city ${city.name}`);
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Error adding random tags to cities:', e);
+    }
+}
+
+async function removeRandomTagsFromCities() {
+    try {
+        const citiesRes = await pool.query('SELECT id, name, tags FROM cities');
+        const cities = citiesRes.rows;
+
+        const randomTagsRes = await pool.query('SELECT name FROM city_tags WHERE random = TRUE');
+        const randomTags = randomTagsRes.rows.map(row => row.name);
+
+        for (const city of cities) {
+            for (const tag of city.tags) {
+                if (randomTags.includes(tag) && Math.random() < 0.25) { // 10% chance to remove a random tag
+                    await tagCity('remove', tag, city.name);
+                    console.log(`Removed random tag ${tag} from city ${city.name}`);
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Error removing random tags from cities:', e);
+    }
+}
+
 async function processFactories() {
     try {
         const res = await pool.query('SELECT player_id, production_sheet FROM factories');
@@ -718,6 +761,8 @@ async function deleteFactory(factoryId){
     }
 }
 
+
+
 async function populateDatabase() {
     await resetDatabase(true);
     await addItems();
@@ -768,7 +813,9 @@ module.exports = {
     handleShipReturn,
     addFactory,
     deleteFactory,
-    processFactories
+    processFactories,
+    addRandomTagsToCities,
+    removeRandomTagsFromCities
 };
 
 
