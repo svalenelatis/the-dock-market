@@ -5,7 +5,7 @@ class TransactionManager {
         this.transactions = [];
     }
 
-    async addTransaction(playerId, shipId, cityName, scheduledDate, actions, needsReturn = true) {
+    async addTransaction(playerId, shipId, cityName, actions, needsReturn = true) {
         try {
             // Check if the ship is ready
             const ship = await dbHandler.getShip(shipId);
@@ -13,9 +13,12 @@ class TransactionManager {
                 throw new Error('Ship is not ready for a new transaction');
             }
 
+            const cityId = await dbHandler.getCityByName(cityName);
+
             // Update ship status to busy
             await dbHandler.updateShipStatus(shipId, 'busy');
 
+            const scheduledDate = new Date(Date.now() + (await dbHandler.getTravelTime(shipId, cityId) * 24 * 60 * 60 * 1000)); //returns travel time in days
             const transactionId = await dbHandler.createTransaction(playerId, shipId, cityName, scheduledDate, actions, needsReturn);
             console.log(`Transaction created with ID: ${transactionId}`);
         } catch (e) {
@@ -111,7 +114,7 @@ class TransactionManager {
             
         }
         else{
-            console.log(`Bought ${quantity} of ${itemName} at ${totalCost}`)
+            console.log(`Bought ${quantity} of ${itemName} at ${totalCost} (${pricePerUnit} at ${transaction.cityName})`)
         }
 
         // Subtract gold from player
@@ -201,6 +204,7 @@ class TransactionManager {
             throw e;
         }
     }
+
 }
 
 module.exports = TransactionManager;

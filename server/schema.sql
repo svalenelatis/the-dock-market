@@ -15,7 +15,8 @@ CREATE TABLE cities (
     name VARCHAR(100) NOT NULL UNIQUE,
     price_sheet JSONB NOT NULL,
     tags TEXT[] DEFAULT NULL,
-    volatility NUMERIC DEFAULT 0.02
+    volatility NUMERIC DEFAULT 0.02,
+    coords JSONB NOT NULL
 );
 
 -- Tags Table
@@ -46,7 +47,8 @@ CREATE TABLE players (
     username VARCHAR(50) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     gold NUMERIC(10,2) DEFAULT 1000.00 NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    home_city_id INT REFERENCES cities(id) ON DELETE SET NULL
 );
 
 CREATE TABLE player_inventories (

@@ -16,29 +16,54 @@ app.get('/test', (req, res) => {
     res.json({ message: 'Server is running!' });
 });
 
-app.post('/api/signup', async (req, res) => {
+app.get('/api/prices', async (req, res) => {
     try {
-        const { username, password } = req.body;
-        const playerId = await dbHandler.createPlayer(username, password);
-        res.status(201).json({ playerId });
+        const pricesObj = await dbHandler.getAllPriceSheets();
+        
+        // Convert the object into a sorted array of [key, value] pairs
+        const sortedEntries = Object.entries(pricesObj)
+            .sort(([cityA], [cityB]) => cityA.localeCompare(cityB))
+            .map(([city, goods]) => [
+                city,
+                Object.fromEntries(
+                    Object.entries(goods)
+                        .sort(([itemA], [itemB]) => itemA.localeCompare(itemB))
+                )
+            ]);
+
+        // Convert back to an object
+        const sortedPrices = Object.fromEntries(sortedEntries);
+        
+        res.json(sortedPrices);
     } catch (e) {
-        console.error('Error signing up:', e);
+        console.error('Error fetching prices:', e);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-app.delete('/api/player/:username', async (req, res) => {
-    try {
-        const { username } = req.params;
-        const result = await dbHandler.deletePlayer(username);
-        if (result) {
-            res.json({ success: true, message: `Player ${username} deleted.` });
-        } else {
-            res.status(404).json({ success: false, message: 'Player not found.' });
-        }
-    } catch (e) {
-        res.status(500).json({ success: false, error: e.message });
-    }
-});
+
+// app.post('/api/signup', async (req, res) => {
+//     try {
+//         const { username, password } = req.body;
+//         const playerId = await dbHandler.createPlayer(username, password);
+//         res.status(201).json({ playerId });
+//     } catch (e) {
+//         console.error('Error signing up:', e);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// });
+// app.delete('/api/player/:username', async (req, res) => {
+//     try {
+//         const { username } = req.params;
+//         const result = await dbHandler.deletePlayer(username);
+//         if (result) {
+//             res.json({ success: true, message: `Player ${username} deleted.` });
+//         } else {
+//             res.status(404).json({ success: false, message: 'Player not found.' });
+//         }
+//     } catch (e) {
+//         res.status(500).json({ success: false, error: e.message });
+//     }
+// });
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

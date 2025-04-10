@@ -38,17 +38,17 @@ async function updatePriceSheets() {  //the main, async function to run the pric
                     let {price,demand,integral,demandSetpoint} = newPriceSheet[good];
                     //console.log(good, " ", newPriceSheet[good].price); 
                     //console.log(price,demand,integral,demandSetpoint)
-                    const oldValues = {oldPrice: price,oldDemand: demand, oldIntegral: integral}; //get the old price
+                    //const oldValues = {oldPrice: price,oldDemand: demand, oldIntegral: integral}; //get the old price
                     //console.log(basePrices[good])
                     const newValues = priceChanger(basePrices[good],price,demandSetpoint,demand,integral,.2 ,5 ,0.1 ,2); //calculate the new price
                     //console.log(newValues)
                     //console.log(good, " ", oldPrice, "->", newValues.price); //log the good, old price, and new price
-                    newPriceSheet[good].price = roundToThree(jitter(newValues.price,city.volatility)); //update the price in the new price sheet
+                    newPriceSheet[good].price = roundToThree(jitter(newValues.price,city.volatility*10)); //update the price in the new price sheet
                     newPriceSheet[good].demand = roundToThree(jitter(newValues.demand,city.volatility));
                     newPriceSheet[good].integral = newValues.integral;
-                    console.log(oldValues)
-                    console.log("---->")
-                    console.log(newValues)
+                    // console.log(oldValues)
+                    // console.log("---->")
+                    // console.log(newValues)
                 })
                 //console.log(newPriceSheet);
                 //console.log(city.id);
@@ -79,11 +79,10 @@ async function addRandomTagsToCities() {
         const randomTags = randomTagsRes.rows.map(row => row.name);
 
         for (const city of cities) {
-            if (Math.random() < 0.25) { // 10% chance to add a random tag
+            if (Math.random() < 0.25) { // 25% chance to add a random tag
                 const randomTag = randomTags[Math.floor(Math.random() * randomTags.length)];
                 if (!city.tags.includes(randomTag)) {
                     await tagCity('add', randomTag, city.name);
-                    console.log(`Added random tag ${randomTag} to city ${city.name}`);
                 }
             }
         }
@@ -128,6 +127,7 @@ async function processFactories() {
                         const { good, quantity } = item;
                         const result = await subtractItemFromInventory(player, good, quantity);
                         if (!result.success) {
+                            console.log('Not Enough Goods')
                             throw new Error(`Insufficient ${good} in inventory for player ${player}`);
                         }
                     }
@@ -137,11 +137,11 @@ async function processFactories() {
                 for (const item of output) {
                     const { good, quantity } = item;
                     await addItemToInventory(player, good, quantity);
-                    console.log("Successfully added item to inventory.");
+                    console.log(`Added ${good} to player ${player}'s inventory`);
                 }
                 //console.log(player, price);
             } catch (e) {
-                console.error(`Error processing factory for player ${player}. Probably not enough goods.`);
+                console.error(`Error processing factory for player ${player}.`);
                 continue; // Skip to the next factory
             }
         }
@@ -166,6 +166,25 @@ async function getPriceSheet(cityName) {
     }
 }
 
+async function getAllPriceSheets() {
+    try {
+        const res = await pool.query('SELECT name, price_sheet FROM cities');
+        const prices = {};
+
+        res.rows.forEach(city => {
+            const cityPrices = {};
+            Object.keys(city.price_sheet).forEach(good => {
+                cityPrices[good] = city.price_sheet[good].price; // Extract only the price
+            });
+            prices[city.name] = cityPrices; // Add the city's prices to the JSON object
+        });
+
+        return prices; // Return the JSON object containing all cities and their prices
+    } catch (e) {
+        console.error('Error getting all price sheets:', e);
+        throw e;
+    }
+}
 async function getGoodPrice(cityName, itemName) {
     try {
         const priceSheet = await getPriceSheet(cityName);
@@ -364,7 +383,7 @@ async function addCities() { //this function will loop through the cities in the
         await pool.query('BEGIN');
         const priceSheet = generatePriceSheet();
         for (const city of cities) {
-            await pool.query('INSERT INTO cities (name, price_sheet,volatility) VALUES ($1, $2,$3)', [city.name, priceSheet,city.volatility]);
+            await pool.query('INSERT INTO cities (name, price_sheet,volatility,coords) VALUES ($1, $2,$3,$4)', [city.name, priceSheet,city.volatility,city.location]);
             console.log('City added:', city.name);
         }
         await pool.query('COMMIT');
@@ -412,10 +431,19 @@ function generatePriceSheet() { //generates a price sheet based on the items in 
     return priceSheet;
 }
 
-async function createPlayer(username, password) {
+async function createPlayer(username, password,cityName) {
     const saltRounds = 10;
+    
 
     const existingUser = await pool.query('SELECT id FROM players WHERE username = $1', [username]);
+    
+    const cityIdRes = await pool.query('SELECT id FROM cities WHERE name = $1', [cityName]);
+    
+
+    if (cityIdRes.rows.length === 0) {
+        throw new Error('City not found');
+    }
+    const cityId = cityIdRes.rows[0].id; //get the city id from the query
 
     if (existingUser.rows.length > 0) {
         throw new Error('Username already exists');
@@ -425,7 +453,7 @@ async function createPlayer(username, password) {
 
     await pool.query('BEGIN');
     try {
-        const result = await pool.query('INSERT INTO players (username, password_hash) VALUES ($1, $2) RETURNING id', [username, hashedPassword]);
+        const result = await pool.query('INSERT INTO players (username, password_hash,home_city_id) VALUES ($1, $2,$3) RETURNING id', [username, hashedPassword,cityId]);
         const playerId = result.rows[0].id;
         await pool.query('COMMIT');
         return playerId;
@@ -761,7 +789,55 @@ async function deleteFactory(factoryId){
     }
 }
 
+async function getTravelTime(shipId, cityId) {
+    try {
+        const shipRes = await pool.query('SELECT speed FROM ships WHERE id = $1', [shipId]);
+        const cityRes = await pool.query('SELECT coords FROM cities WHERE id = $1', [cityId]);
+        const playerRes = await pool.query('SELECT home_city_id FROM players WHERE id = $1', [shipId]); //get the player id from the ship id
+        const playerCityRes = await pool.query('SELECT coords FROM cities WHERE id = $1', [playerRes.rows[0].home_city_id]); //get the player city coords from the player id
 
+        if (shipRes.rows.length === 0 || cityRes.rows.length === 0) {
+            throw new Error('Ship or city not found');
+        }
+
+        const shipSpeed = shipRes.rows[0].speed;
+        const cityCoords = cityRes.rows[0].coords;
+        
+        const playerCityCoords = playerCityRes.rows[0].coords; //get the player city coords from the query
+        
+        console.log(cityCoords.x," ",cityCoords.y);
+        console.log(playerCityCoords.x," ",playerCityCoords.y);
+
+
+        // Calculate travel time based on distance and ship speed
+        const distance = Math.sqrt(
+            Math.pow(cityCoords.x - playerCityCoords.x, 2) +
+            Math.pow(cityCoords.y - playerCityCoords.y, 2)
+        );
+        const finalDistance = (distance == 0) ? 1 : distance; //if distance is 0, set it to 1 to avoid division by zero
+        console.log("Distance: ",finalDistance);
+        const travelTime = finalDistance / shipSpeed; // time = distance / speed, where speed is units per day
+        console.log(`Travel time: ${travelTime}`);
+
+        return travelTime;
+    } catch (e) {
+        console.error('Error calculating travel time:', e);
+        throw e;
+    }
+}
+
+async function getCityByName(cityName) {
+    try {
+        const res = await pool.query('SELECT id FROM cities WHERE name = $1', [cityName]);
+        if (res.rows.length === 0) {
+            throw new Error('City not found');
+        }
+        return res.rows[0].id;
+    } catch (e) {
+        console.error('Error getting city by name:', e);
+        throw e;
+    }
+}
 
 async function populateDatabase() {
     await resetDatabase(true);
@@ -770,11 +846,11 @@ async function populateDatabase() {
     await addItemTags();
     await addCities();
     await tagCities();
-    await createPlayer('Zorgmor','123')
-    await createPlayer('Mammoth','123')
-    await createPlayer('Gonzola','123')
-    await createPlayer('74747474','123')
-    await createPlayer('Zorgmor24','123')
+    // await createPlayer('Zorgmor','123')
+    // await createPlayer('Mammoth','123')
+    // await createPlayer('Gonzola','123')
+    // await createPlayer('74747474','123')
+    // await createPlayer('Zorgmor24','123')
     //pool.end();
 }   //this function should be run on first time setup to populate the database with the dataObjects.json file
 
@@ -815,7 +891,10 @@ module.exports = {
     deleteFactory,
     processFactories,
     addRandomTagsToCities,
-    removeRandomTagsFromCities
+    removeRandomTagsFromCities,
+    getTravelTime,
+    getCityByName,
+    getAllPriceSheets,
 };
 
 
