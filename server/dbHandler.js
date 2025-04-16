@@ -1,10 +1,9 @@
-require('dotenv').config({path: '../.env'});
+require('dotenv').config();
 const { Pool } = require('pg');
 const priceChanger = require('./priceChanger');
 const fs = require('fs');
 const { populate } = require('dotenv');
 const bcrypt = require('bcrypt');
-
 
 const pool = new Pool({
     host: process.env.PGHOST,
@@ -13,6 +12,7 @@ const pool = new Pool({
     password: process.env.PGPASSWORD,
     port: process.env.PGPORT,
 });
+
 async function updatePriceSheets() {  //the main, async function to run the price sheet update in a wrapped transaction
     const client = await pool.connect(); //grab a client to complete the transaction
 
@@ -204,7 +204,7 @@ function jitter(value,factor) {
 }
 
 async function addItems() { //adds all items from config. 
-    const items = JSON.parse(fs.readFileSync('./dataObjects.json')).items; //grab the items from the config file
+    const items = JSON.parse(fs.readFileSync('./server/dataObjects.json')).items; //grab the items from the config file
     //console.log(items);
 
     try {
@@ -230,8 +230,8 @@ async function addItems() { //adds all items from config.
 }   
 
 async function addCityTags() { //adds City Tags from config
-    const cityTags = JSON.parse(fs.readFileSync('./dataObjects.json')).cityTags; //grab the city tags from the config file
-    const randomTags = JSON.parse(fs.readFileSync('./dataObjects.json')).randomEventTags; //grab the random tags from the config file
+    const cityTags = JSON.parse(fs.readFileSync('./server/dataObjects.json')).cityTags; //grab the city tags from the config file
+    const randomTags = JSON.parse(fs.readFileSync('./server/dataObjects.json')).randomEventTags; //grab the random tags from the config file
      
 
     try{
@@ -335,7 +335,7 @@ async function tagCity(operation, tagName, city) { // this function will add/rem
 
 async function resetDatabase(poolCheck) { //Full Database Reset and Schema Load. Remove when done testing. poolCheck to determine if pool should stay open or close after reset
     try {
-        const schema = fs.readFileSync('./schema.sql', 'utf8');
+        const schema = fs.readFileSync('./server/schema.sql', 'utf8');
         console.log('Schema read:', schema);
         await pool.query(schema);
         console.log('Database reset, schema successfully loaded');
@@ -355,7 +355,7 @@ async function resetDatabase(poolCheck) { //Full Database Reset and Schema Load.
 }
 
 function addCity(cityId) { //deprecated function to add a single city to database. Keeping just in case/as admin function
-    const cities = JSON.parse(fs.readFileSync('./dataObjects.json')).cityList;
+    const cities = JSON.parse(fs.readFileSync('./server/dataObjects.json')).cityList;
     const name = cities[cityId].name;
     const sheet = cities[cityId].priceSheet;
     pool.query('INSERT INTO cities (name, price_sheet) VALUES ($1, $2)', [name, sheet], (err, res) => {
@@ -368,7 +368,7 @@ function addCity(cityId) { //deprecated function to add a single city to databas
 });}
 
 async function tagCities() { //loops cities and runs tagCity for each tag on each city
-    const cityList = JSON.parse(fs.readFileSync('./dataObjects.json')).cityList;
+    const cityList = JSON.parse(fs.readFileSync('./server/dataObjects.json')).cityList;
 
     for (const city of cityList) {
         for (const tag of city.tags) {
@@ -378,7 +378,7 @@ async function tagCities() { //loops cities and runs tagCity for each tag on eac
 }
 
 async function addCities() { //this function will loop through the cities in the dataObjects.json file and add them to the database. Will use addItems to populate price sheets
-    const cities = JSON.parse(fs.readFileSync('./dataObjects.json')).cityList;
+    const cities = JSON.parse(fs.readFileSync('./server/dataObjects.json')).cityList;
     try {
         await pool.query('BEGIN');
         const priceSheet = generatePriceSheet();
@@ -396,7 +396,7 @@ async function addCities() { //this function will loop through the cities in the
 }
 
 async function addItemTags() { //this function will loop through the item tags in the dataObjects.json file and add them to the database
-    const itemTags = JSON.parse(fs.readFileSync('./dataObjects.json')).itemTags;
+    const itemTags = JSON.parse(fs.readFileSync('./server/dataObjects.json')).itemTags;
     try {
         await pool.query('BEGIN');
         
@@ -423,7 +423,7 @@ async function addItemTags() { //this function will loop through the item tags i
 
 function generatePriceSheet() { //generates a price sheet based on the items in the dataObjects.json file
     const priceSheet = {};
-    const items = JSON.parse(fs.readFileSync('./dataObjects.json')).items;
+    const items = JSON.parse(fs.readFileSync('./server/dataObjects.json')).items;
     for (const item of items) {
         priceSheet[item.name] = {price: item.basePrice, demand: 1, demandSetpoint: 1, integral: 0};
     }
