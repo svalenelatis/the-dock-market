@@ -98,7 +98,43 @@ app.get('/api/prices', async (req, res) => {
               "Weapons": 97.29,
               "Wood": 36.25,
               "Zerikanium": 197.34
-            }
+            },
+			"Temikor2": {
+				"Building Materials": 45.37,
+				"Clothing": 44.92,
+				"Gemstones": 55.23,
+				"Gold": 55.9,
+				"Grain": 9.61,
+				"Livestock": 18.58,
+				"Metal": 18.51,
+				"Rations": 15.64,
+				"Silver": 46.41,
+				"Stone": 25.85,
+				"Textiles": 26.81,
+				"Tools": 45.39,
+				"Water": 17.51,
+				"Weapons": 97.29,
+				"Wood": 36.25,
+				"Zerikanium": 197.34
+			  },
+			  "Jamaca": {
+				"Building Materials": 45.37,
+				"Clothing": 44.92,
+				"Gemstones": 55.23,
+				"Gold": 55.9,
+				"Grain": 9.61,
+				"Livestock": 18.58,
+				"Metal": 18.51,
+				"Rations": 15.64,
+				"Silver": 46.41,
+				"Stone": 25.85,
+				"Textiles": 26.81,
+				"Tools": 45.39,
+				"Water": 17.51,
+				"Weapons": 97.29,
+				"Wood": 36.25,
+				"Zerikanium": 197.34
+			  }
           };
         
         res.json(sortedPrices);
