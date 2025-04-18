@@ -23,14 +23,14 @@ async function setupTestData() {
             output: [{ good: 'Rations', quantity: 2 }]
         });
         const factory2Id = await dbHandler.addFactory('Factory2', player2Id, {
-            price: [{ good: 'Metal', quantity: 3 }],
+            price: [{ good: 'Iron', quantity: 3 }],
             output: [{ good: 'Tools', quantity: 1 }]
         });
 
 
         console.log('Adding inventory for ships...');
         await dbHandler.addItemToInventory(ship1Id, 'Grain', 50, true);
-        await dbHandler.addItemToInventory(ship2Id, 'Metal', 30, true);
+        await dbHandler.addItemToInventory(ship2Id, 'Iron', 30, true);
 
         console.log('Creating test transactions...');
 
@@ -40,7 +40,7 @@ async function setupTestData() {
         }, true);
 
         await transactionManager.addTransaction(player2Id, ship2Id, 'Blue Harbor', {
-            action: [{ type: 'sell', itemName: 'Metal', quantity: 5 }]
+            action: [{ type: 'sell', itemName: 'Iron', quantity: 5 }]
         }, true);
 
         // // Transactions for a couple of minutes later
