@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config();
 const dbHandler = require('./dbHandler');
 const TransactionManager = require('./transactionManager');
 
