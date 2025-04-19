@@ -22,6 +22,7 @@ app.use(bodyParser.json());
 //log all attempted requests to the console
 app.use((req, res, next) => {
     console.log(`Request: ${req.method} ${req.url}`);
+    console.log(`Params: ${JSON.stringify(req.params)}`);
     next();
 }
 );
@@ -59,12 +60,10 @@ app.get('/api/prices', async (req, res) => {
     }
 });
 
-app.get('/api/player'), async (req, res) => { //MAKE SURE THE BODY OF THE REQUEST CONTAINS A PLAYER NAME OR THIS ROUTE WONT WORK
+app.get('/api/player', async (req, res) => { //MAKE SURE THE BODY OF THE REQUEST CONTAINS A PLAYER NAME OR THIS ROUTE WONT WORK
     try {
-
-
         item = {}
-        if(req.body.searchName === "Synn"){
+        if(req.query.searchName === "Synn"){
             item = {
                 "name" : "Synn Rixen",
                 "home port" : "Katu",
@@ -102,7 +101,7 @@ app.get('/api/player'), async (req, res) => { //MAKE SURE THE BODY OF THE REQUES
                 }
             }
         }
-        else if(req.body.searchName == "Rad'num"){
+        else if(req.query.searchName == "Rad'num"){
             item = {
                 "name" : "Rad'num LongLastname",
                 "home port" : "Greenlands",
@@ -156,7 +155,7 @@ app.get('/api/player'), async (req, res) => { //MAKE SURE THE BODY OF THE REQUES
         console.error('Error fetching prices:', e);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-}
+});
 
 // app.post('/api/signup', async (req, res) => {
 //     try {
