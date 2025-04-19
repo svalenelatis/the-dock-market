@@ -35,6 +35,16 @@ app.get('/test', (req, res) => {
     res.json({ message: 'Server is running!' });
 });
 
+app.get('/api/players', async (req, res) => {
+    try {
+        const players = await dbHandler.getAllPlayers();
+        res.json(players);
+    } catch (e) {
+        console.error('Error fetching players:', e);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 app.get('/api/prices', async (req, res) => {
     try {
         const pricesObj = await dbHandler.getAllPriceSheets();
@@ -60,97 +70,15 @@ app.get('/api/prices', async (req, res) => {
     }
 });
 
-app.get('/api/player', async (req, res) => { //MAKE SURE THE BODY OF THE REQUEST CONTAINS A PLAYER NAME OR THIS ROUTE WONT WORK
+app.get('/api/player/:playerUsername', async (req, res) => { //MAKE SURE THE BODY OF THE REQUEST CONTAINS A PLAYER NAME OR THIS ROUTE WONT WORK
     try {
         item = {}
-        if(req.query.searchName === "Synn"){
-            item = {
-                "name" : "Synn Rixen",
-                "home port" : "Katu",
-                "Gold" : 1400,
-                "Inventory" : {
-                    "Grain" : 10,
-                    "Stone" : 10,
-                    "Fruit" : 10
-                },
-                "Ships" : {
-                    "Ship Name" : {
-                        "Speed" : 1,
-                        "Inventory" : {
-                            "Iron" : 3
-                        },
-                        "Status" : "Ready"
-                    },
-                    "Ship Name 2" : {
-                        "Speed" : 2,
-                        "Inventory" : {
-                            "Preserves" : 3
-                        },
-                        "Status" : "Returning"
-                    }
-                },
-                "Factories" : {
-                    "Iron Mine" : {
-                        "Price" : {
-
-                        },
-                        "Production" : {
-                            "Iron Ore" : 1
-                        }
-                    }
-                }
-            }
-        }
-        else if(req.query.searchName == "Rad'num"){
-            item = {
-                "name" : "Rad'num LongLastname",
-                "home port" : "Greenlands",
-                "Gold" : 200,
-                "Inventory" : {
-                    "Grain" : 2,
-                    "Stone" : 5,
-                    "Fruit" : 2
-                },
-                "Ships" : {
-                    "Ship Name" : {
-                        "Speed" : 1,
-                        "Inventory" : {
-                            "Coal" : 9
-                        },
-                        "Status" : "Not Ready"
-                    },
-                    "Ship Name 2" : {
-                        "Speed" : 1.5,
-                        "Inventory" : {
-                            "Jewelry" : 1
-                        },
-                        "Status" : "Ready"
-                    }
-                },
-                "Factories" : {
-                    "Coal Mine" : {
-                        "Price" : {
-
-                        },
-                        "Production" : {
-                            "Coal" : 1
-                        }
-                    },
-                    "Rations Factory" : {
-                        "Price" : {
-                            "Flour" : 1,
-                            "Livestock" : 1,
-                            "Water" : 1
-                        },
-                        "Production" : {
-                            "Rations" : 2
-                        }
-                    }
-                }
-            }
-        }
+        const { playerUsername } = req.params;
+        console.log(`Fetching player data for: ${playerUsername}`);
+        const player = await dbHandler.getPlayer(playerUsername);
+            
         
-        res.json(item);
+        res.json({ player });
     } catch (e) {
         console.error('Error fetching prices:', e);
         res.status(500).json({ error: 'Internal Server Error' });

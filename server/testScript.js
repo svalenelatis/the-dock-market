@@ -10,8 +10,8 @@ async function setupTestData() {
         await dbHandler.populateDatabase();
 
         console.log('Creating test players...');
-        const player1Id = await dbHandler.createPlayer('Player1', 'password1', 'Katu');
-        const player2Id = await dbHandler.createPlayer('Player2', 'password2', 'Katu');
+        const player1Id = await dbHandler.createPlayer('Synn', 'password1', 'Katu');
+        const player2Id = await dbHandler.createPlayer('Radnum', 'password2', 'Katu');
 
         console.log('Adding ships for players...');
         const ship1Id = await dbHandler.addShip(player1Id, 'Ship1', 1, 100);
@@ -29,6 +29,9 @@ async function setupTestData() {
 
 
         console.log('Adding inventory for ships...');
+        await dbHandler.addItemToInventory(player1Id, 'Water', 20);
+        await dbHandler.addItemToInventory(player2Id, 'Tools', 10);
+
         await dbHandler.addItemToInventory(ship1Id, 'Grain', 50, true);
         await dbHandler.addItemToInventory(ship2Id, 'Iron', 30, true);
 

@@ -483,6 +483,80 @@ async function deletePlayer(username) {
     }
 }
 
+async function getPlayerId(username) {
+    try {
+        const res = await pool.query('SELECT id FROM players WHERE username = $1', [username]);
+        if (res.rows.length === 0) {
+            throw new Error('Player not found');
+        }
+        return res.rows[0].id; // Return the player ID 
+    } catch (e) {
+        console.error('Error getting player ID:', e);
+        throw e;
+    }
+}
+
+async function getPlayerShips(playerId) {
+    try {
+        const res = await pool.query('SELECT * FROM ships WHERE player_id = $1', [playerId]);
+        for (let i = 0; i < res.rows.length; i++) { //loop through the ships and get their inventories
+            const shipId = res.rows[i].id;
+            const inventory = await getInventory(shipId,true); //get the ship inventory
+            res.rows[i].inventory = inventory; //add the inventory to the ship object
+        }
+        return res.rows;
+    } catch (e) {
+        console.error('Error getting all ships:', e);
+        throw e;
+    }
+
+}
+
+async function getFactories(playerId) {
+    try {
+        const res = await pool.query('SELECT * FROM factories WHERE player_id = $1', [playerId]);
+        return res.rows;
+    } catch (e) {
+        console.error('Error getting all factories:', e);
+        throw e;
+    }
+}
+
+async function getPlayer(username) {
+    try {
+        const id = await getPlayerId(username);
+        console.log(id);
+        const pRes = await pool.query('SELECT * FROM players WHERE id = $1', [id]);
+        if (pRes.rows.length === 0) {
+            throw new Error('Player not found');
+        }
+        response = {}
+        response.name = pRes.rows[0].username;
+        response.cityId = pRes.rows[0].home_city_id;
+        response.gold = pRes.rows[0].gold;
+        response.inventory = await getInventory(id);
+        response.ships = await getPlayerShips(id);
+        response.factories = await getFactories(id);
+
+        return response;
+    } catch (e) {
+        console.error('Error getting player:', e);
+        throw e;
+    }
+}
+
+
+
+async function getAllPlayers() {
+    try {
+        const res = await pool.query('SELECT username FROM players');
+        return res.rows;
+    } catch (e) {
+        console.error('Error getting all players:', e);
+        throw e;
+    }
+}
+
 async function itemExists(itemName) {
     try {
         const res = await pool.query(
@@ -574,7 +648,7 @@ async function subtractItemFromInventory(ownerId, itemName, quantity, isShip = f
     }
 }
 
-async function returnInventory(ownerId, isShip = false) {
+async function getInventory(ownerId, isShip = false) {
     try {
         const table = isShip ? 'ship_inventories' : 'player_inventories';
         const idColumn = isShip ? 'ship_id' : 'player_id';
@@ -731,7 +805,7 @@ async function handleShipReturn(shipId) {
         const ship = await getShip(shipId);
         const playerId = ship.player_id;
         // Transfer goods from ship to player inventory
-        const shipInventory = await returnInventory(shipId, true);
+        const shipInventory = await getInventory(shipId, true);
         for (const item of shipInventory) {
             await addItemToInventory(playerId, item.item_name, item.quantity);
             await subtractItemFromInventory(shipId, item.item_name, item.quantity, true);
@@ -839,6 +913,7 @@ async function getCityByName(cityName) {
     }
 }
 
+
 async function populateDatabase() {
     await resetDatabase(true);
     await addItems();
@@ -872,7 +947,7 @@ module.exports = {
     itemExists,
     addItemToInventory,
     subtractItemFromInventory,
-    returnInventory,
+    getInventory,
     changeGold,
     createTransaction,
     getPendingTransactions,
@@ -895,30 +970,10 @@ module.exports = {
     getTravelTime,
     getCityByName,
     getAllPriceSheets,
+    getAllPlayers,
+    getPlayerId,
+    getPlayerShips,
+    getPlayer,
+    getFactories,
 };
 
-
-//nudgePriceSheets();
-//updatePriceSheets();
-//addCity(3);
-//addItems();
-//addCityTags();
-//tagCity('add','Agricultural','Blue Harbor');
-//resetDatabase();
-//addItemTags();
-//generatePriceSheet();
-//addCities();
-//populateDatabase();
-//createPlayer('platedfungi','Fakepassword#44');
-//itemExists('Zerikanium')
-//addItemToInventory(3,"Zerikanium",5,false);
-// prod = {
-//     price: [
-//         {good: "Cows",quantity:1}
-//     ],
-//     output: [
-//         {good: "Grain",quantity: 1}
-//     ]
-// }
-//addFactory('Grain-Cow Factory',1,prod)
-//processFactories();
