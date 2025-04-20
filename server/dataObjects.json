@@ -31,9 +31,10 @@
     }}
 ],"itemTags": [
     {"name" : "Food","goods" : ["Grain","Livestock","Water","Rations"],"description" : "These goods are used for food."},
-    {"name" : "Raw Materials","goods" : ["Metal","Stone","Wood"],"description" : "These goods are used to make other goods."},
-    {"name" : "Luxury Goods","goods" : ["Gold","Silver","Gemstones","Zerikanium"],"description" : "These goods are expensive and rare."},
-    {"name" : "Manufactured Goods","goods" : ["Weapons","Tools","Clothing","Building Materials"],"description" : "These goods are manufactured from raw materials."}
+    {"name" : "Raw Materials","goods" : ["Iron Ore","Stone","Wood","Textiles"],"description" : "These goods are used to make other goods."},
+    {"name" : "Luxury Goods","goods" : ["Spices","Fruit","Gemstones","Zerikanium"],"description" : "These goods are expensive and rare."},
+    {"name" : "Refined Goods","goods" : ["Flour","Iron"],"description" : "These goods are refined from raw materials"},
+    {"name" : "Manufactured Goods","goods" : ["Armor and Weapons","Tools","Clothing","Building Materials"],"description" : "These goods are manufactured from raw materials."}
 ],"items": [
     {"name": "Grain", "basePrice": 10},
     {"name": "Water", "basePrice": 10},
@@ -41,35 +42,23 @@
     {"name": "Iron Ore", "basePrice": 10},
     {"name": "Stone", "basePrice": 10},
     {"name": "Wood", "basePrice": 10},
-    {"name": "Coal", "basePrice": 10},
-    {"name": "Salt", "basePrice": 10},
     {"name": "Spices", "basePrice": 20},
-    {"name": "Sugarcane", "basePrice": 20},
     {"name": "Fruit", "basePrice": 20},
-    {"name": "Silver Ore", "basePrice": 20},
     {"name": "Gemstones", "basePrice": 20},
     {"name": "Livestock", "basePrice": 20},
-    {"name": "Glass", "basePrice": 20},
-    {"name": "Sugar", "basePrice": 25, "components": ["Sugarcane"]},
-    {"name": "Leather", "basePrice": 25, "components": ["Livestock"]},
     {"name": "Flour", "basePrice": 15, "components": ["Grain"]},
-    {"name": "Iron", "basePrice": 30, "components" : ["Iron Ore","Coal"]},
-    {"name": "Clothing", "basePrice": 40, "components": ["Textiles","Leather"]},
-    {"name": "Medical Supplies", "basePrice": 30, "components": ["Textiles","Spices"]},
-    {"name": "Silver", "basePrice": 45, "components" : ["Silver Ore","Coal"]},
-    {"name": "Preserves", "basePrice": 65, "components" : ["Fruit","Sugar"]},
+    {"name": "Iron", "basePrice": 30, "components" : ["Iron Ore","Wood"]},
+    {"name": "Clothing", "basePrice": 40, "components": ["Textiles","Livestock"]},
     {"name": "Rations", "basePrice": 70, "components": ["Flour","Livestock","Water"]},
-    {"name": "Weapons", "basePrice": 80, "components": ["Iron","Wood","Coal"]},
-    {"name": "Armor", "basePrice": 105, "components": ["Iron","Textiles","Leather"]},
+    {"name": "Armor and Weapons", "basePrice": 80, "components": ["Iron","Wood","Coal"]},
     {"name": "Tools", "basePrice": 80, "components": ["Iron","Wood","Coal"]},
     {"name": "Building Materials", "basePrice": 80, "components": ["Stone","Wood","Iron"]},
-    {"name": "Luxury Seasonings", "basePrice": 80, "components": ["Spices","Sugar","Salt"]},
-    {"name": "Zerikanium", "basePrice": 230, "components": ["Tools","Silver","Gemstones"]}
+    {"name": "Zerikanium", "basePrice": 270, "components": ["Tools","Rations","Gemstones"]}
 ],"cityList": [
     {
         "name": "Katu",
         "tags": ["Industrial","Cultural","Mercantile"],
-        "volatility": 0.1,
+        "volatility": 0.2,
         "location": {
             "x": 0,
             "y": 0
@@ -78,19 +67,19 @@
     {
         "name": "Blue Harbor",
         "tags": ["Mercantile","Lawless","Wealthy"],
-        "volatility": 0.1,
+        "volatility": 0.2,
         "location": {
-            "x": 5,
-            "y": 5
+            "x": 1,
+            "y": 0
         }
     },
     {
-        "name": "Temikor",
-        "tags": ["Mining","Isolated","Cultural"],
+        "name": "The Frem",
+        "tags": ["Verdant","Agricultural","Cultural"],
         "volatility": 0.1,
         "location": {
-            "x": 3,
-            "y": -2
+            "x": -3,
+            "y": 2
         }
     },
     {
@@ -98,26 +87,26 @@
         "tags": ["Mercantile","Wealthy","Artisinal","Cultural"]
         ,"volatility": 0.1,
         "location": {
-            "x": 3,
-            "y": 2
-        }
-    },
-	{
-        "name": "Fae'lu",
-        "tags": ["Xenophobic","Agricultural","Wealthy"],
-        "volatility": 0.2,
-        "location": {
-            "x": 2,
+            "x": 1,
             "y": 1
         }
     },
 	{
+        "name": "Fae'lu",
+        "tags": ["Xenophobic","Isolated","Wealthy"],
+        "volatility": 0.2,
+        "location": {
+            "x": 3,
+            "y": 3
+        }
+    },
+	{
         "name": "Greenlands",
-        "tags": ["Mercantile","Agricultural","Poor"],
+        "tags": ["Verdant","Agricultural","Poor"],
         "volatility": 0.1,
         "location": {
             "x": 2,
-            "y": -3
+            "y": -4
         }
     },
 	{
@@ -149,11 +138,11 @@
     },
 	{
         "name": "Blazefin Isles",
-        "tags": ["Xenophobic","Cultural","Poor"],
+        "tags": ["Xenophobic","Cultural","Poor","Military"],
         "volatility": 0.1,
         "location": {
-            "x": 2,
-            "y": -3
+            "x": -5,
+            "y": -5
         }
     },
 	{
@@ -166,17 +155,26 @@
         }
     },
 {
-        "name": "The Frem",
-        "tags": ["Mining","Agricultural","Cultural"],
+        "name": "Temikor",
+        "tags": ["Mining","Artisinal","Cultural"],
         "volatility": 0.1,
         "location": {
-            "x": -1,
-            "y": 2
+            "x": -2,
+            "y": 3
         }
     },
-{
+    {
         "name": "Eastern Tribes",
-        "tags": ["Mercantile","Isolated","Poor"],
+        "tags": ["Industrial","Isolated","Poor"],
+        "volatility": 0.2,
+        "location": {
+            "x": 5,
+            "y": 1
+        }
+    },
+    {
+        "name": "Domain of the Merae",
+        "tags": ["Agricultural","Artisinal","Xenophobic"],
         "volatility": 0.2,
         "location": {
             "x": 5,
@@ -189,14 +187,10 @@
     "description" : "This island grows a lot of food.",
     "effects" : {
         "goods" : {
-            "Grain" : -0.1,
-            "Livestock" : -0.1,
-            "Wood" : -0.1,
-            "Water" : 0.1,
             "Tools" : 0.1
         },
         "tags" : {
-            "Food" : 0.1
+            "Food" : -0.1
         }
     }},
     {
@@ -204,18 +198,11 @@
     "description" : "This island produces a lot of goods.",
     "effects" : {
         "goods" : {
-            "Textiles" : 0.1,
-            "Metal" : 0.1,
-            "Stone" : 0.1,
-            "Wood" : 0.1,
-            "Gold" : 0.0,
-            "Silver" : 0.1,
-            "Gemstones" : 0.1,
-            "Weapons" : -0.1,
-            "Tools" : -0.1,
-            "Clothing" : -0.1,
-            "Rations" : -0.1,
-            "Building Materials" : -0.1
+            "Rations" : 0.1
+        },
+        "tags" : {
+            "Raw Materials" : 0.1,
+            "Manufactured Goods" : -0.1
         }
     }},
     {
@@ -223,11 +210,15 @@
     "description" : "This island has a lot of mines.",
     "effects" : {
         "goods" : {
-            "Metal" : -0.1,
+            "Iron Ore" : -0.1,
             "Stone" : -0.1,
-            "Gold" : -0.1,
-            "Silver" : -0.1,
+            "Wood" : 0.1,
+            "Gemstones" : -0.1,
+            "Zerikanium" : -0.1,
             "Tools" : 0.1
+        },
+        "tags" : {
+            
         }
     }},
     {
@@ -235,22 +226,13 @@
     "description" : "This island is a hub of trade.",
     "effects" : {
         "goods" : {
-            "Grain" : -0.1,
-            "Livestock" : -0.1,
-            "Water" : -0.1,
-            "Textiles" : -0.1,
-            "Metal" : -0.1,
-            "Stone" : -0.1,
-            "Wood" : -0.1,
-            "Gold" : 0.2,
-            "Silver" : 0.2,
-            "Gemstones" : 0.2,
-            "Zerikanium" : 0.2,
-            "Weapons" : 0.1,
-            "Tools" : 0.1,
-            "Clothing" : 0.1,
-            "Rations" : 0.1,
-            "Building Materials" : 0.1
+            "Zerikanium" : 0.1
+        },
+        "tags" : {
+            "Luxury Goods" : 0.1,
+            "Refined Goods" : 0.1,
+            "Food" : -0.1,
+            "Raw Materials" : -0.1
         }
     }},
     {
@@ -258,9 +240,12 @@
     "description" : "This island has a strong military presence.",
     "effects" : {
         "goods" : {
-            "Weapons" : 0.1,
-            "Rations" : 0.1,
-            "Building Materials" : 0.1
+            "Armor and Weapons" : 0.1,
+            "Building Materials" : 0.1,
+            "Rations" : 0.2,
+            "Clothing" : 0.1
+        },
+        "tags" : {
         }
     }},
     {
@@ -268,22 +253,13 @@
     "description" : "This island is far from other islands.",
     "effects" : {
         "goods" : {
-            "Grain" : 0.1,
-            "Livestock" : 0.1,
-            "Water" : 0.1,
-            "Textiles" : 0.1,
-            "Metal" : 0.1,
-            "Stone" : 0.1,
-            "Wood" : 0.1,
-            "Gold" : 0.1,
-            "Silver" : 0.1,
-            "Gemstones" : 0.1,
-            "Zerikanium" : 0.1,
-            "Weapons" : 0.1,
-            "Tools" : 0.1,
-            "Clothing" : 0.1,
-            "Rations" : 0.1,
-            "Building Materials" : 0.1
+        },
+        "tags" : {
+            "Food" : 0.1,
+            "Raw Materials" : 0.1,
+            "Luxury Goods" : 0.1,
+            "Refined Goods" : 0.1,
+            "Manufactured Goods" : 0.1
         }
     }},
     {
@@ -291,12 +267,11 @@
     "description" : "This island has a rich cultural history.",
     "effects" : {
         "goods" : {
-            "Textiles" : 0.1,
-            "Gold" : 0.1,
-            "Silver" : 0.1,
-            "Gemstones" : 0.1,
-            "Clothing" : 0.1,
-            "Building Materials" : 0.1
+            "Clothing" : -0.1,
+            "Textiles" : -0.1
+        },
+        "tags" : {
+            "Luxury Goods" : -0.1
         }
     }},
     {
@@ -304,19 +279,15 @@
     "description" : "This island dislikes other islands.",
     "effects" : {
         "goods" : {
-            "Grain" : -0.1,
-            "Livestock" : -0.1,
-            "Water" : -0.1,
-            "Textiles" : -0.1,
-            "Metal" : -0.1,
-            "Stone" : -0.1,
-            "Wood" : -0.1,
-            "Zerikanium" : 0.1,
-            "Weapons" : 0.1,
-            "Tools" : -0.1,
-            "Clothing" : -0.1,
-            "Rations" : -0.1,
-            "Building Materials" : -0.1
+            "Armor and Weapons" : 0.2,
+            "Zerikanium" : 0.2
+        },
+        "tags" : {
+            "Food" : -0.1,
+            "Raw Materials" : -0.1,
+            "Luxury Goods" : -0.1,
+            "Refined Goods" : -0.1,
+            "Manufactured Goods" : -0.1
         }
     }},
     {
@@ -324,12 +295,14 @@
     "description" : "This island is very wealthy.",
     "effects" : {
         "goods" : {
-            "Gold" : 0.2,
-            "Silver" : 0.2,
             "Gemstones" : 0.2,
             "Zerikanium" : 0.2,
-            "Weapons" : 0.1,
+            "Armor and Weapons" : 0.1,
             "Building Materials" : 0.1
+        },
+        "tags" : {
+            "Food" : -0.1,
+            "Raw Materials" : -0.1
         }
     }},
     {
@@ -337,18 +310,14 @@
     "description" : "This island is very poor.",
     "effects" : {
         "goods" : {
-            "Grain" : 0.1,
-            "Livestock" : 0.1,
-            "Water" : 0.1,
-            "Textiles" : 0.1,
-            "Metal" : 0.1,
-            "Stone" : 0.1,
-            "Wood" : 0.1,
-            "Weapons" : -0.1,
-            "Tools" : -0.1,
-            "Clothing" : -0.1,
-            "Rations" : -0.1,
-            "Building Materials" : -0.1
+            "Zerikanium" : -0.1
+        },
+        "tags" : {
+            "Food" : 0.1,
+            "Raw Materials" : 0.1,
+            "Luxury Goods" : -0.1,
+            "Refined Goods" : -0.1,
+            "Manufactured Goods" : -0.1
         }
     }},
     {
@@ -357,13 +326,11 @@
     "effects" : {
         "goods" : {
             "Textiles" : 0.1,
-            "Metal" : 0.1,
-            "Gold" : 0.1,
-            "Silver" : 0.1,
-            "Gemstones" : 0.1,
-            "Weapons" : 0.1,
             "Tools" : 0.1,
-            "Clothing" : 0.1
+            "Building Materials" : 0.1
+        },
+        "tags" : {
+            "Luxury Goods" : 0.1
         }
     }},
     {
@@ -372,12 +339,11 @@
     "effects" : {
         "goods" : {
             "Water" : 0.1,
-            "Weapons" : 0.1,
-            "Rations" : 0.1,
-            "Zerikanium" : 0.1,
-            "Gold" : 0.1,
-            "Silver" : 0.1,
-            "Building Materials" : 0.1
+            "Armor and Weapons" : 0.1,
+            "Zerikanium" : 0.1
+        },
+        "tags" : {
+            "Manufactured Goods" : 0.1
         }
     }},
     {
@@ -385,15 +351,14 @@
     "description" : "This island was recently hit by a storm, and is rebuilding.",
     "effects" : {
         "goods" : {
-            "Grain" : 0.3,
-            "Livestock" : 0.3,
-            "Water" : 0.3,
-            "Stone" : 0.3,
-            "Wood" : 0.3,
-            "Tools" : 0.3,
-            "Clothing" : 0.3,
-            "Rations" : 0.3,
-            "Building Materials" : 0.3
+
+        },
+        "tags" : {
+            "Food" : 0.3,
+            "Raw Materials" : 0.3,
+            "Luxury Goods" : 0.3,
+            "Refined Goods" : 0.3,
+            "Manufactured Goods" : 0.3
         }
     }},
     {
@@ -401,19 +366,32 @@
     "description" : "This island's crops are suffering from a blight.",
     "effects" : {
         "goods" : {
-            "Grain" : 0.3,
-            "Livestock" : 0.3,
-            "Water" : 0.3,
-            "Rations" : 0.3
+
+        },
+        "tags" : {
+            "Food" : 0.3
         }
-    }}
+    }},
+    {
+        "name" : "Verdant",
+        "description" : "This island is lush and fertile.",
+        "effects" : {
+            "goods" : {
+                "Wood" : -0.1,
+                "Livestock" : -0.1,
+                "Tools" : 0.1
+            },
+            "tags" : {
+                
+            }
+        }}
 ],"randomEventTags": [
     {
         "name" : "Drought",
         "description" : "A drought has hit the island, causing food prices to rise.",
         "effects" : {
             "goods": {
-                "Wood" : 0.05
+                "Water" : 0.05
             },
             "tags" : {
                 "Food" : 0.05
@@ -425,20 +403,18 @@
         "description" : "A bountiful harvest has caused food prices to drop.",
         "effects" : {
             "goods": {
-                "Wood" : 0.05
             },
             "tags" : {
-                "Food" : 0.05
+                "Food" : -0.05
             }
         }
     },
     {
-        "name": "Desert Caravan",
+        "name": "Exotic Caravan",
         "description": "A large merchant caravan has arrived, increasing the supply of exotic goods.",
         "effects": {
             "tags": {
-                "Luxury Goods": -0.03,
-                "Spices": -0.02
+                "Luxury Goods": -0.03
             }
         }
     },
@@ -469,7 +445,7 @@
         "description": "A counterfeit currency scandal has made merchants wary, increasing the price of valuable goods.",
         "effects": {
             "tags": {
-                "Precious Metals": 0.03
+                "Luxury Goods": 0.03
             }
         }
     },
@@ -477,17 +453,22 @@
         "name": "Architect’s Commission",
         "description": "A wealthy noble has ordered new buildings, raising demand for construction materials.",
         "effects": {
-            "tags": {
+            "goods": {
                 "Building Materials": 0.04
+            },
+            "tags": {
+                "Raw Materials": 0.02
             }
         }
     },
     {
         "name": "Guild Regulation",
-        "description": "A trade guild has imposed new regulations, slightly raising the price of manufactured goods.",
+        "description": "A trade guild has imposed new regulations, slightly raising the price of refined goods.",
         "effects": {
+            "goods": {
+            },
             "tags": {
-                "Refined Materials": 0.02
+                "Refined Goods": 0.02
             }
         }
     },
@@ -495,6 +476,8 @@
         "name": "Surplus Harvest",
         "description": "An unusually good harvest has caused a surplus of grains and produce.",
         "effects": {
+            "goods": {
+            },
             "tags": {
                 "Food": -0.04
             }
@@ -504,8 +487,9 @@
         "name": "Drunken Festival",
         "description": "A local festival has driven up alcohol consumption and demand for entertainment goods.",
         "effects": {
+            "goods": {
+            },
             "tags": {
-                "Alcohol": 0.03,
                 "Luxury Goods": 0.02
             }
         }
@@ -514,8 +498,10 @@
         "name": "Storm at Sea",
         "description": "A major storm has delayed merchant ships, reducing supply of imported goods.",
         "effects": {
+            "goods": {
+            },
             "tags": {
-                "Imported Goods": 0.03
+                "Raw Materials": 0.03
             }
         }
     },
@@ -523,8 +509,12 @@
         "name": "Plague Outbreak",
         "description": "A minor plague outbreak has increased demand for medicinal supplies.",
         "effects": {
+            "goods": {
+                "Spices": 0.03,
+                "Fruit": 0.02,
+                "Water": 0.02
+            },
             "tags": {
-                "Medicine": 0.05
             }
         }
     },
@@ -532,18 +522,22 @@
         "name": "Flooded Farmlands",
         "description": "Heavy rains have flooded farmlands, causing crop shortages.",
         "effects": {
+            "goods": {
+            },
             "tags": {
                 "Food": 0.03
             }
         }
     },
     {
-        "name": "Drought Conditions",
-        "description": "A lack of rain has caused water shortages, affecting agriculture and industry.",
+        "name": "Material Stockpile",
+        "description": "A large stockpile of materials is being sold off, decreasing demand.",
         "effects": {
+            "goods": {
+            },
             "tags": {
-                "Food": 0.03,
-                "Raw Materials": 0.02
+                "Raw Materials": -0.04,
+                "Manufactured Goods": 0.02
             }
         }
     },
@@ -551,8 +545,14 @@
         "name": "Merchant Tax",
         "description": "New government taxes on merchants have slightly increased trade costs.",
         "effects": {
+            "goods": {
+            },
             "tags": {
-                "All Goods": 0.01
+                "Food": 0.02,
+                "Luxury Goods": 0.02,
+                "Refined Goods": 0.02,
+                "Manufactured Goods": 0.02,
+                "Raw Materials" : 0.02
             }
         }
     },
@@ -560,9 +560,11 @@
         "name": "Black Market Surge",
         "description": "Illegal trade has undercut official markets, reducing prices of certain goods.",
         "effects": {
+            "goods": {
+                "Weapons": 0.04
+            },
             "tags": {
-                "Luxury Goods": -0.02,
-                "Weapons": -0.02
+                "Luxury Goods": -0.04
             }
         }
     },
@@ -570,9 +572,13 @@
         "name": "Mystic’s Prophecy",
         "description": "A traveling mystic's prediction has caused panic buying of certain valuables.",
         "effects": {
+            "goods": {
+                "Gemstones": 0.03,
+                "Spices": 0.02,
+                "Textiles": 0.02
+            },
             "tags": {
-                "Precious Metals": 0.03,
-                "Gemstones": 0.02
+
             }
         }
     },
@@ -580,8 +586,11 @@
         "name": "New Trade Agreement",
         "description": "A treaty has opened up new trade routes, slightly increasing the supply of imports.",
         "effects": {
+            "goods": {
+            },
             "tags": {
-                "Imported Goods": -0.02
+                "Food" : -0.03,
+                "Raw Materials" : -0.03
             }
         }
     },
@@ -589,19 +598,24 @@
         "name": "Cattle Disease",
         "description": "A livestock disease has reduced the supply of meat and leather.",
         "effects": {
+            "goods": {
+                "Livestock": 0.04,
+                "Grain": 0.02
+            },
             "tags": {
-                "Food": 0.02,
-                "Leather Goods": 0.03
             }
         }
     },
     {
         "name": "Mine Collapse",
-        "description": "A tragic mine collapse has decreased ore production, raising metal prices.",
+        "description": "A tragic warehouse collapse has decreased ore production, raising metal prices.",
         "effects": {
+            "goods": {
+                "Tools": 0.03,
+                "Iron Ore": 0.02
+            },
             "tags": {
-                "Raw Materials": 0.03,
-                "Refined Materials": 0.02
+                "Raw Materials": 0.03
             }
         }
     },
@@ -609,9 +623,11 @@
         "name": "Alchemy Breakthrough",
         "description": "Alchemists have discovered a new refining method, slightly increasing production of rare goods.",
         "effects": {
+            "goods": {
+                "Spices": -0.03,
+                "Gemstones": -0.02
+            },
             "tags": {
-                "Refined Materials": -0.02,
-                "Medicine": -0.01
             }
         }
     },
@@ -619,8 +635,10 @@
         "name": "Theater Craze",
         "description": "A popular play has driven up demand for fine clothing and entertainment goods.",
         "effects": {
+            "goods": {
+                "Clothing": 0.03
+            },
             "tags": {
-                "Clothing": 0.03,
                 "Luxury Goods": 0.02
             }
         }
@@ -629,8 +647,10 @@
 		"name": "Bandits",
 		"description": "Bandits have been spotted in the area, driving up the demand for weapons.",
 		"effects": {
-			"goods": {
-				"Weapons": 0.07
+            "goods": {
+                "Armor and Weapons": 0.04
+            },
+			"tags": {
 			}
 		}
 	},
@@ -638,8 +658,11 @@
 		"name": "Shipwreck",
 		"description": "A ship sank in the nearby ocean, and the locals are diving to collect the valuables.",
 		"effects": {
+            "goods": {
+                "Tools": 0.03
+            },
 			"tags": {
-				"Luxury Goods": -0.08
+				"Luxury Goods": -0.03
 			}
 		}
 	},
@@ -647,10 +670,14 @@
 		"name": "Embezzlement Bust",
 		"description": "An important member of the local government was caught embezzling funds, and now they find themself with a surplus to invest.",
 		"effects": {
-			"goods": {
-				"Building Materials": 0.06,
-				"Tools": 0.05,
-				"Livestock": 0.04
+            "goods": {
+                "Zerikanium": 0.07,
+                "Iron": -0.06,
+				"Tools": -0.05,
+				"Livestock": -0.04
+            },
+			"tags": {
+				
 			}
 		}
 	},
@@ -660,6 +687,9 @@
 		"effects": {
 			"goods": {
 				"Gemstones": 0.1
+			},
+            "tags": {
+				
 			}
 		}
 	},
@@ -671,7 +701,8 @@
 				"Tools": 0.06
 			},
 			"tags": {
-				"Food": 0.08
+				"Food": 0.08,
+                "Manufactured Goods": -0.05
 			}
 		}
 	}

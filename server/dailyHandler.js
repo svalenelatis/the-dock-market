@@ -10,8 +10,6 @@ async function dailyTasks(){
         //Add some random tags and wobble
         console.log("Adding and removing Random Tags")
         await dbHandler.addRandomTagsToCities();
-        await dbHandler.addRandomTagsToCities();
-        await dbHandler.removeRandomTagsFromCities();
         await dbHandler.removeRandomTagsFromCities();
         //Update all price sheets according to random variance
         console.log("Updating Pricesheets. This may take a while.")

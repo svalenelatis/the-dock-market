@@ -11,20 +11,28 @@ async function setupTestData() {
 
         console.log('Creating test players...');
         const player1Id = await dbHandler.createPlayer('Synn', 'password1', 'Katu');
-        const player2Id = await dbHandler.createPlayer('Radnum', 'password2', 'Katu');
+        const player2Id = await dbHandler.createPlayer('Radnum', 'password2', 'Capricorn');
 
         console.log('Adding ships for players...');
-        const ship1Id = await dbHandler.addShip(player1Id, 'Ship1', 1, 100);
-        const ship2Id = await dbHandler.addShip(player2Id, 'Ship2', 1.5, 150);
+        const ship1Id = await dbHandler.addShip(player1Id, 'The Brilliance', 1, 30);
+        const ship2Id = await dbHandler.addShip(player2Id, 'Nightfang', 1.2, 25);
 
         console.log('Adding factories for players...');
-        const factory1Id = await dbHandler.addFactory('Factory1', player1Id, {
-            price: [{ good: 'Grain', quantity: 5 }],
-            output: [{ good: 'Rations', quantity: 2 }]
+        const factory1Id = await dbHandler.addFactory('Farm', player1Id, {
+            price: [],
+            output: [{ good: 'Grain', quantity: 1 }]
         });
-        const factory2Id = await dbHandler.addFactory('Factory2', player2Id, {
-            price: [{ good: 'Iron', quantity: 3 }],
-            output: [{ good: 'Tools', quantity: 1 }]
+        const factory1Id2 = await dbHandler.addFactory('Grain Mill', player1Id, {
+            price: [{ good: 'Grain', quantity: 1 }],
+            output: [{ good: 'Flour', quantity: 1 }]
+        });
+        const factory2Id = await dbHandler.addFactory('Iron Mine', player2Id, {
+            price: [],
+            output: [{ good: 'Iron Ore', quantity: 1 }]
+        });
+        const factory2Id2 = await dbHandler.addFactory('Iron Refinery', player2Id, {
+            price: [{ good: 'Iron Ore', quantity: 1 }],
+            output: [{ good: 'Iron', quantity: 1 }]
         });
 
 
@@ -39,11 +47,13 @@ async function setupTestData() {
 
         // Transactions for today
         await transactionManager.addTransaction(player1Id, ship1Id, 'Katu', {
-            action: [{ type: 'buy', itemName: 'Water', quantity: 10 }]
+            action: [{ type: 'sell', itemName: 'Grain', quantity: 50 },
+                { type: 'buy', itemName: 'Stone', quantity: 20 }]
         }, true);
 
         await transactionManager.addTransaction(player2Id, ship2Id, 'Blue Harbor', {
-            action: [{ type: 'sell', itemName: 'Iron', quantity: 5 }]
+            action: [{ type: 'sell', itemName: 'Iron', quantity: 30 },
+                { type: 'buy', itemName: 'Tools', quantity: 5 }]
         }, true);
 
         // // Transactions for a couple of minutes later

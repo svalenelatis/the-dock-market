@@ -114,7 +114,7 @@ class TransactionManager {
             
         }
         else{
-            console.log(`Bought ${quantity} of ${itemName} at ${totalCost} (${pricePerUnit} at ${transaction.cityName})`)
+            console.log(`Bought ${quantity} of ${itemName} at ${totalCost} (${pricePerUnit} at ${transaction.city_name})`)
         }
 
         // Subtract gold from player
@@ -125,7 +125,7 @@ class TransactionManager {
         }
 
         // Check ship's available space
-        const shipInventory = await dbHandler.returnInventory(transaction.ship_id, true);
+        const shipInventory = await dbHandler.getInventory(transaction.ship_id, true);
         const ship = await dbHandler.getShip(transaction.ship_id);
         const currentSpaceUsed = shipInventory.reduce((acc, item) => acc + item.quantity, 0);
         const availableSpace = ship.cargo_space - currentSpaceUsed;

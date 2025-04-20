@@ -40,10 +40,10 @@ async function updatePriceSheets() {  //the main, async function to run the pric
                     //console.log(price,demand,integral,demandSetpoint)
                     //const oldValues = {oldPrice: price,oldDemand: demand, oldIntegral: integral}; //get the old price
                     //console.log(basePrices[good])
-                    const newValues = priceChanger(basePrices[good],price,demandSetpoint,demand,integral,.2 ,5 ,0.1 ,2); //calculate the new price
+                    const newValues = priceChanger(basePrices[good],price,demandSetpoint,demand,integral,.2 ,2 ,0.1 ,2); //calculate the new price
                     //console.log(newValues)
                     //console.log(good, " ", oldPrice, "->", newValues.price); //log the good, old price, and new price
-                    newPriceSheet[good].price = roundToThree(jitter(newValues.price,city.volatility*10)); //update the price in the new price sheet
+                    newPriceSheet[good].price = roundToThree(jitter(newValues.price,city.volatility)); //update the price in the new price sheet
                     newPriceSheet[good].demand = roundToThree(jitter(newValues.demand,city.volatility));
                     newPriceSheet[good].integral = newValues.integral;
                     // console.log(oldValues)
@@ -525,11 +525,12 @@ async function getFactories(playerId) {
 async function getPlayer(username) {
     try {
         const id = await getPlayerId(username);
-        console.log(id);
         const pRes = await pool.query('SELECT * FROM players WHERE id = $1', [id]);
         if (pRes.rows.length === 0) {
             throw new Error('Player not found');
         }
+
+        const transRes = await pool.query('SELECT * FROM transactions WHERE player_id = $1 AND status = $2', [id,'pending']);
         response = {}
         response.name = pRes.rows[0].username;
         response.cityId = pRes.rows[0].home_city_id;
@@ -537,6 +538,7 @@ async function getPlayer(username) {
         response.inventory = await getInventory(id);
         response.ships = await getPlayerShips(id);
         response.factories = await getFactories(id);
+        response.transactions = transRes.rows;
 
         return response;
     } catch (e) {
@@ -544,7 +546,6 @@ async function getPlayer(username) {
         throw e;
     }
 }
-
 
 
 async function getAllPlayers() {
@@ -879,8 +880,6 @@ async function getTravelTime(shipId, cityId) {
         
         const playerCityCoords = playerCityRes.rows[0].coords; //get the player city coords from the query
         
-        console.log(cityCoords.x," ",cityCoords.y);
-        console.log(playerCityCoords.x," ",playerCityCoords.y);
 
 
         // Calculate travel time based on distance and ship speed
@@ -889,9 +888,7 @@ async function getTravelTime(shipId, cityId) {
             Math.pow(cityCoords.y - playerCityCoords.y, 2)
         );
         const finalDistance = (distance == 0) ? 1 : distance; //if distance is 0, set it to 1 to avoid division by zero
-        console.log("Distance: ",finalDistance);
         const travelTime = finalDistance / shipSpeed; // time = distance / speed, where speed is units per day
-        console.log(`Travel time: ${travelTime}`);
 
         return travelTime;
     } catch (e) {

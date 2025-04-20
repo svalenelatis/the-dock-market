@@ -11,6 +11,6 @@
   "scripts": {
 	"start": "node server/server.js && node server/dailyHandler.js",
     "test": "node server/testScript.js",
-	"daily": "node server/dailyScript.js"
+	"daily": "node server/dailyHandler.js"
   }
 }
