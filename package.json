@@ -10,7 +10,8 @@
   },
   "scripts": {
 	"start": "node server/server.js && node server/dailyHandler.js",
-    "test": "node server/testScript.js",
-	"daily": "node server/dailyHandler.js"
+  "test": "node server/testScript.js",
+	"daily": "node server/dailyHandler.js",
+  "boot" : "node server/scripts/bootScript.js"
   }
 }

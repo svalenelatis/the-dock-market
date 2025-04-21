@@ -333,12 +333,12 @@ async function tagCity(operation, tagName, city) { // this function will add/rem
 
 } 
 
-async function resetDatabase(poolCheck) { //Full Database Reset and Schema Load. Remove when done testing. poolCheck to determine if pool should stay open or close after reset
+async function verifyDatabase(poolCheck) { //Full Database verify and Schema Load. Remove when done testing. poolCheck to determine if pool should stay open or close after reset
     try {
         const schema = fs.readFileSync('./server/schema.sql', 'utf8');
         console.log('Schema read:', schema);
         await pool.query(schema);
-        console.log('Database reset, schema successfully loaded');
+        console.log('Tables verified and created if not exist');
     }
     catch (e) {
         console.error('Error loading schema:', e);
@@ -912,7 +912,7 @@ async function getCityByName(cityName) {
 
 
 async function populateDatabase() {
-    await resetDatabase(true);
+    await verifyDatabase(true);
     await addItems();
     await addCityTags();
     await addItemTags();
@@ -933,7 +933,7 @@ module.exports = {
     addItems,
     addCityTags,
     tagCity,
-    resetDatabase,
+    verifyDatabase,
     addCity,
     tagCities,
     addCities,

@@ -1,8 +1,7 @@
-DROP TABLE IF EXISTS city_tags, item_tag_goods, item_tags, cities, items, players, player_inventories, transactions, ships, ship_inventories, factories CASCADE;
 
 
 -- Items Table
-CREATE TABLE items (
+CREATE TABLE IF NOT EXISTS items (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     base_price NUMERIC NOT NULL,
@@ -10,7 +9,7 @@ CREATE TABLE items (
 );
 
 -- Cities Table
-CREATE TABLE cities (
+CREATE TABLE IF NOT EXISTS cities (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     price_sheet JSONB NOT NULL,
@@ -20,7 +19,7 @@ CREATE TABLE cities (
 );
 
 -- Tags Table
-CREATE TABLE city_tags (
+CREATE TABLE IF NOT EXISTS city_tags (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT,
@@ -29,20 +28,20 @@ CREATE TABLE city_tags (
 );
 
 -- Item Tags Table
-CREATE TABLE item_tags (
+CREATE TABLE IF NOT EXISTS item_tags (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT
 );
 
 -- Item Tag Goods Table
-CREATE TABLE item_tag_goods (
+CREATE TABLE IF NOT EXISTS item_tag_goods (
     item_tag_id INT REFERENCES item_tags(id) ON DELETE CASCADE,
     good_name VARCHAR(100) NOT NULL,
     PRIMARY KEY (item_tag_id, good_name)
 );
 
-CREATE TABLE players (
+CREATE TABLE IF NOT EXISTS players (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
@@ -51,14 +50,14 @@ CREATE TABLE players (
     home_city_id INT REFERENCES cities(id) ON DELETE SET NULL
 );
 
-CREATE TABLE player_inventories (
+CREATE TABLE IF NOT EXISTS player_inventories (
     player_id INT REFERENCES players(id) ON DELETE CASCADE,
     item_name VARCHAR(100) REFERENCES items(name) ON DELETE CASCADE,
     quantity INT DEFAULT 0,
     PRIMARY KEY (player_id, item_name)
 );
 
-CREATE TABLE transactions (
+CREATE TABLE IF NOT EXISTS transactions (
     id SERIAL PRIMARY KEY,
     player_id INT REFERENCES players(id) ON DELETE CASCADE,
     ship_id INT, -- Assuming you have a ships table or will add one
@@ -70,7 +69,7 @@ CREATE TABLE transactions (
     needs_return BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE ships (
+CREATE TABLE IF NOT EXISTS ships (
     id SERIAL PRIMARY KEY,
     player_id INT REFERENCES players(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
@@ -81,14 +80,14 @@ CREATE TABLE ships (
     status VARCHAR(20) DEFAULT 'ready'
 );
 
-CREATE TABLE ship_inventories (
+CREATE TABLE IF NOT EXISTS ship_inventories (
     ship_id INT REFERENCES ships(id) ON DELETE CASCADE,
     item_name VARCHAR(100) REFERENCES items(name) ON DELETE CASCADE,
     quantity INT DEFAULT 0,
     PRIMARY KEY (ship_id, item_name)
 );
 
-CREATE TABLE factories (
+CREATE TABLE IF NOT EXISTS factories (
     id SERIAL PRIMARY KEY,
     player_id INT REFERENCES players(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,

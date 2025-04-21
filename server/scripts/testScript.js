@@ -1,6 +1,6 @@
 require('dotenv').config();
-const dbHandler = require('./dbHandler');
-const TransactionManager = require('./transactionManager');
+const dbHandler = require('../dbHandler');
+const TransactionManager = require('../transactionManager');
 
 const transactionManager = new TransactionManager();
 
