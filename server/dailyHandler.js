@@ -26,5 +26,3 @@ async function dailyTasks(){
         console.error("Error processing daily transactions.", e)
     }
 }
-
-cron.schedule('* 10 * * *',dailyTasks);
