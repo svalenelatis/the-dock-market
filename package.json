@@ -9,7 +9,7 @@
     "pg": "^8.13.1"
   },
   "scripts": {
-	"start": "node server/server.js && node server/dailyHandler.js",
+	"start": "node server/server.js",
   "test": "node server/testScript.js",
 	"daily": "node server/dailyHandler.js",
   "boot" : "node server/scripts/bootScript.js"

@@ -7,7 +7,7 @@ const transactionManager = new TransactionManager();
 async function setupTestData() {
     try {
         console.log('Makin tables...');
-        dbHandler.verifyDatabase(false);
+        dbHandler.verifyDatabase(true);
         console.log("Checking for existing data...");
         const playerData = await dbHandler.getAllPlayers();
         if (playerData.length > 0) {
