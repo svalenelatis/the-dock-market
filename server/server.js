@@ -155,14 +155,20 @@ app.post('/api/ship', async (req, res) => {
 app.post('/api/signup', async (req, res) => {
     try {
 
+        // const ship1Id2 = await dbHandler.addShip(player1Id, 'Nightfang', 1.2, 25);
+        // const factory1Id2 = await dbHandler.addFactory('Grain Mill', player1Id, {
+        //             price: [{ good: 'Grain', quantity: 1 }],
+        //             output: [{ good: 'Flour', quantity: 1 }]
+        //         });
 
         const { username, password,pass,factoryName,price, output,shipName,speed,cargoCapacity } = req.body;
         if(pass != process.env.PASS) {
             console.log("Password not provided or incorrect. Transaction not added.");
             return res.status(403).json({ error: 'Forbidden' });
         }
-        console.log(`Creating player ${username} with ID ${playerId}.`);
+        
         const playerId = await dbHandler.createPlayer(username, password);
+        console.log(`Creating player ${username} with ID ${playerId}.`);
         console.log(`Adding factory ${factoryName} for player ${playerId}.`);
         const factoryId = await dbHandler.addFactory(factoryName, playerId, { price, output });
         console.log(`Adding ship ${shipName} for player ${playerId}.`);
