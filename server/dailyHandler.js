@@ -27,4 +27,4 @@ async function dailyTasks(){
     }
 }
 
-cron.schedule('* * * * *',dailyTasks);
+cron.schedule('* 10 * * *',dailyTasks);
