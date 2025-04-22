@@ -15,7 +15,7 @@ async function setupTestData() {
         }
 
         const existingData = await dbHandler.getAllPriceSheets();
-        if (existingData.length > 0) {
+        if (existingData.length != 0) {
             console.log("Existing data found. Startup completed.");
         }
         else {

@@ -336,7 +336,7 @@ async function tagCity(operation, tagName, city) { // this function will add/rem
 async function verifyDatabase(poolCheck) { //Full Database verify and Schema Load. Remove when done testing. poolCheck to determine if pool should stay open or close after reset
     try {
         const schema = fs.readFileSync('./server/schema.sql', 'utf8');
-        console.log('Schema read:', schema);
+        console.log('Schema read:');
         await pool.query(schema);
         console.log('Tables verified and created if not exist');
     }
