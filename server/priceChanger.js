@@ -32,7 +32,7 @@ function calculateNewPrice(basePrice,price, demandSetPoint,demand,integral, iter
     let integralNew = integral + (error * iterm);
     let demandNew = demandScale * (1/(1 + Math.exp(-demandReactivity * (price-basePrice))));
     
-    priceNew = price + pterm*error + iterm * integral
+    priceNew = Math.max(basePrice * 0.1, price + pterm*error + iterm * integral);
 
     demandNew = roundToThree(demandNew);
     integralNew = roundToThree(integralNew);

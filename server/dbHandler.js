@@ -40,7 +40,7 @@ async function updatePriceSheets() {  //the main, async function to run the pric
                     //console.log(price,demand,integral,demandSetpoint)
                     //const oldValues = {oldPrice: price,oldDemand: demand, oldIntegral: integral}; //get the old price
                     //console.log(basePrices[good])
-                    const newValues = priceChanger(basePrices[good],price,demandSetpoint,demand,integral,.2 ,2 ,0.1 ,2); //calculate the new price
+                    const newValues = priceChanger(basePrices[good],price,demandSetpoint,demand,integral,.05 ,.2 ,4 ,2); //calculate the new price
                     //console.log(newValues)
                     //console.log(good, " ", oldPrice, "->", newValues.price); //log the good, old price, and new price
                     newPriceSheet[good].price = roundToThree(jitter(newValues.price,city.volatility)); //update the price in the new price sheet
