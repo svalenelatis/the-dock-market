@@ -26,3 +26,5 @@ async function dailyTasks(){
         console.error("Error processing daily transactions.", e)
     }
 }
+
+dailyTasks();
