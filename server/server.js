@@ -109,6 +109,16 @@ app.post('/api/transaction', async (req, res) => {
 
 });
 
+app.get('/api/alldata', async (req, res) => {
+    try {
+        const allData = await dbHandler.getAllCities();
+        res.json(allData);
+    } catch (e) {
+        console.error('Error fetching all data:', e);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 
 app.post('/api/factory', async (req, res) => {

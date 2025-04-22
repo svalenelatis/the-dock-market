@@ -4,6 +4,7 @@ const priceChanger = require('./priceChanger');
 const fs = require('fs');
 const { populate } = require('dotenv');
 const bcrypt = require('bcrypt');
+const { get } = require('http');
 
 const pool = new Pool({
     host: process.env.PGHOST,
@@ -910,6 +911,16 @@ async function getCityByName(cityName) {
     }
 }
 
+async function getAllCities() {
+    try {
+        const res = await pool.query('SELECT * FROM cities');
+        return res.rows;
+    } catch (e) {
+        console.error('Error getting all cities:', e);
+        throw e;
+    }
+}
+
 
 async function populateDatabase() {
     await verifyDatabase(true);
@@ -972,5 +983,6 @@ module.exports = {
     getPlayerShips,
     getPlayer,
     getFactories,
+    getAllCities,
 };
 
